@@ -47,7 +47,35 @@ This means the `main` branch (Production) always talks to the prod Supabase proj
 
 ### 5. Local development
 
-1. Install the Vercel CLI (e.g. via `pnpm`/`npm`) and log in: `vercel login`.
-2. Link the local repo to the Vercel project: `vercel link`.
-3. Pull the Development-scoped env vars: `vercel env pull .env.local`.
-4. Install dependencies and start the dev server.
+This project uses [pnpm](https://pnpm.io) as its package manager.
+
+1. Install pnpm (via corepack, bundled with Node.js):
+   ```bash
+   corepack enable
+   corepack prepare pnpm@latest --activate
+   ```
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+   If you see `[ERR_PNPM_IGNORED_BUILDS]` (pnpm blocks native build scripts by default), approve the required packages and reinstall:
+   ```bash
+   pnpm approve-builds
+   pnpm install
+   ```
+   This project already allow-lists `sharp` and `unrs-resolver` in `pnpm-workspace.yaml`.
+3. Install the Vercel CLI and log in:
+   ```bash
+   pnpm add -g vercel
+   vercel login
+   ```
+4. Link the local repo to the Vercel project and pull the Development-scoped env vars:
+   ```bash
+   vercel link
+   vercel env pull .env.local
+   ```
+5. Start the dev server:
+   ```bash
+   pnpm dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000).
