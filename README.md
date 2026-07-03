@@ -1,2 +1,2 @@
 # camstreets
-Cambridge school streets volunteer availibility calendar
+Cambridge school streets volunteer availability calendar
