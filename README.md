@@ -47,10 +47,23 @@ This means the `main` branch (Production) always talks to the prod Supabase proj
 
 ### 5. Local development
 
-This project uses [pnpm](https://pnpm.io) as its package manager.
+This project uses [pnpm](https://pnpm.io) as its package manager. We recommend managing Node.js itself with [nvm](https://github.com/nvm-sh/nvm) rather than a system install, so you can match versions across machines and switch easily.
 
-1. Install pnpm (via corepack, bundled with Node.js):
+1. Install Node.js via nvm, then pnpm via corepack:
    ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+   ```
+   The install script appends the following to `~/.bashrc` automatically — check it's there (or add it yourself if using a non-standard shell setup):
+   ```bash
+   export NVM_DIR="$HOME/.nvm"
+   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+   ```
+   Reload your shell, then install Node and enable pnpm through corepack (bundled with Node.js):
+   ```bash
+   source ~/.bashrc
+   nvm install --lts
+   nvm use --lts
    corepack enable
    corepack prepare pnpm@latest --activate
    ```
