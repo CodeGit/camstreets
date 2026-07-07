@@ -6,6 +6,13 @@ create table public.schools (
   created_at timestamptz not null default now()
 );
 
+create table public.school_admins (
+  school_id bigint not null references public.schools (id),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (school_id, user_id)
+);
+
 create table public.locations (
   id bigint generated always as identity primary key,
   school_id bigint not null references public.schools (id),
@@ -29,11 +36,13 @@ create table public.slots (
 
 create table public.terms (
   id bigint generated always as identity primary key,
-  name text not null unique,
+  school_id bigint not null references public.schools (id),
+  name text not null,
   start_date date not null,
   end_date date not null check (end_date > start_date),
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (school_id, name)
 );
 
 create table public.slot_instances (
