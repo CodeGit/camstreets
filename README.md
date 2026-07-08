@@ -142,13 +142,37 @@ iterate.
 ```bash
 pnpm supabase test new <name> --template pgtap
 ```
-scaffolds a pgTAP test file in `supabase/tests/database/`. Run all of them
-with:
+scaffolds a pgTAP test file in `supabase/tests/`. Run all of them with:
 ```bash
 pnpm supabase test db --local
 ```
 
-**Note:** none of the above touches the hosted dev/prod Supabase projects
-(the ones the deployed app actually uses, configured in step 2) — it's all
-local-only. Pushing schema changes to a hosted project is a separate,
-deliberate step not yet documented here.
+**Note:** everything above only touches the local Docker stack, not the
+hosted dev/prod Supabase projects from step 2.
+
+**Pushing migrations to a hosted project:**
+
+First authenticate the CLI — `supabase login` opens a browser OAuth flow; if
+that's not available (e.g. a non-interactive shell), generate a personal
+access token at
+[supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens)
+and set it as `SUPABASE_ACCESS_TOKEN`. Then link to the specific hosted
+project you want to push to:
+```bash
+pnpm supabase link --project-ref <project-ref>
+```
+**Always double-check which `--project-ref` you're using.** Linking to the
+production ref by mistake and pushing means applying untested migrations
+straight to production. Find each environment's ref under Project Settings →
+General in the Supabase dashboard, or via `pnpm supabase projects list`. In
+day-to-day development you should almost always be linked to the **dev**
+project, not prod.
+
+Once linked, push local migrations to that hosted project:
+```bash
+pnpm supabase db push
+```
+Unlike `link`, this requires your database password (the project's Postgres
+password, set when it was created — not the access token) and will prompt
+for it. `supabase/seed.sql` is **not** applied by `db push` — it's
+local-only by design (see [`supabase/README.md`](supabase/README.md)).
