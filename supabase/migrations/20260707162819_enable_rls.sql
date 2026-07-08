@@ -8,11 +8,15 @@ as $$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'is_superuser')::boolean, false);
 $$;
 
+-- security definer (not invoker): school_admins has its own RLS policy that
+-- calls this function, so an invoker-rights query here would recurse into
+-- that policy forever. Safe as definer because the check is hardcoded to
+-- the caller's own auth.uid() — there's no parameter to inspect anyone else.
 create or replace function public.is_school_admin(p_school_id bigint)
 returns boolean
 language sql
 stable
-security invoker
+security definer
 set search_path = ''
 as $$
   select exists (
