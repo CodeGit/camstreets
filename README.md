@@ -92,3 +92,63 @@ This project uses [pnpm](https://pnpm.io) as its package manager. We recommend m
    pnpm dev
    ```
    Open [http://localhost:3000](http://localhost:3000).
+
+### 6. Database development (Supabase CLI + local stack)
+
+Schema changes live as SQL migration files in `supabase/migrations/` — see
+[`supabase/README.md`](supabase/README.md) for what the schema actually
+contains (entities and RLS policies). This section is about the tooling to
+work on them.
+
+**Dependencies:**
+- The Supabase CLI is already included via `pnpm install` (step 2 above) —
+  it's a `devDependency` in `package.json`, no separate install needed. Run
+  it as `pnpm supabase <command>`.
+- [Docker](https://docs.docker.com/get-docker/) must be installed and
+  running — the local Supabase stack (Postgres, Auth, Studio, Realtime,
+  Storage) runs as Docker containers on your machine.
+
+**Running the local stack:**
+```bash
+pnpm supabase start
+```
+First run pulls the Docker images (a minute or two); subsequent runs are
+fast. This also applies every migration in `supabase/migrations/` against a
+fresh local database, so it's the first real check that they're valid SQL.
+On success it prints local URLs and keys, including a **Studio URL**
+(`http://127.0.0.1:54323` by default) — a local copy of the Supabase
+dashboard for browsing tables and running queries by hand.
+
+When you're done:
+```bash
+pnpm supabase stop
+```
+
+**Making a schema change:**
+```bash
+pnpm supabase migration new <descriptive_name>
+```
+This creates an empty, correctly-timestamped `.sql` file in
+`supabase/migrations/` — write the change into it, then reapply all
+migrations from scratch against the local database:
+```bash
+pnpm supabase db reset
+```
+`db reset` wipes the local database and replays every migration file in
+order, so it's also how you catch ordering mistakes or SQL errors as you
+iterate.
+
+**Running tests:**
+```bash
+pnpm supabase test new <name> --template pgtap
+```
+scaffolds a pgTAP test file in `supabase/tests/database/`. Run all of them
+with:
+```bash
+pnpm supabase test db --local
+```
+
+**Note:** none of the above touches the hosted dev/prod Supabase projects
+(the ones the deployed app actually uses, configured in step 2) — it's all
+local-only. Pushing schema changes to a hosted project is a separate,
+deliberate step not yet documented here.
