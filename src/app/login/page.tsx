@@ -13,6 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithMagicLink } from "./actions";
 
+const ERROR_MESSAGES: Record<string, string> = {
+  "missing-email": "Enter your email address.",
+  "send-failed": "Something went wrong sending the link. Try again.",
+  "callback-failed":
+    "That sign-in link didn't work — it may have expired, already been used, or been opened in a different browser than the one you requested it from. Try signing in again.",
+};
+
 export default async function LoginPage({
   searchParams,
 }: {
@@ -40,9 +47,7 @@ export default async function LoginPage({
           {error && (
             <Alert variant="destructive">
               <AlertDescription>
-                {error === "missing-email"
-                  ? "Enter your email address."
-                  : "Something went wrong sending the link. Try again."}
+                {ERROR_MESSAGES[error] ?? "Something went wrong. Try again."}
               </AlertDescription>
             </Alert>
           )}
