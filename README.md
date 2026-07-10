@@ -28,11 +28,13 @@ Create two separate Supabase projects so prod and dev data never mix:
 
 1. Sign in at [vercel.com](https://vercel.com) and click **Add New → Project**.
 2. Import the GitHub repo from step 1.
-3. In **Project Settings → Git**, confirm the **Production Branch** is set to `main`.
-4. Add domains under **Project Settings → Domains**:
+3. **Verify Project Settings → General → Framework Preset is set to `Next.js`, not `Other`.** This can end up as `Other` (e.g. if the framework wasn't auto-detected correctly during import), and it's a nasty silent failure: `next build` still runs fine and reports success either way, but with `Other` selected Vercel deploys the project as a plain static site — serving only whatever's literally in `public/` — and ignores the actual Next.js server build entirely. The symptom is every route 404ing (including ones that should always work, like the framework-served `favicon.ico`), even immediately after a fresh, successful-looking deployment. If you ever see that, this setting is the first thing to check.
+4. In **Project Settings → Git**, confirm the **Production Branch** is set to `main`.
+5. Add domains under **Project Settings → Domains**:
    - Add `www.camstreets.org` — this serves the Production branch (`main`) by default.
    - Add `dev.camstreets.org`, then edit it and set its **Git Branch** to `dev` so it always serves the latest `dev` deployment instead of Production.
-   - If the domain isn't already on Vercel's nameservers, add the DNS records Vercel provides at your domain registrar.
+   - If the domain isn't already on Vercel's nameservers, add the DNS records Vercel provides at your domain registrar. Note that a domain can also work without full nameserver delegation (e.g. specific A/CNAME records at your existing registrar) — `vercel domains inspect <domain>` showing a nameserver mismatch doesn't necessarily mean the domain isn't reaching Vercel; test the actual URL to be sure.
+6. Decide on **Project Settings → Deployment Protection**. By default Vercel gates non-Production deployments (which includes the `dev` branch) behind a Vercel-account login (its "Vercel Authentication" / SSO feature). Turn it off if `dev.camstreets.org` should be reachable without a Vercel login; leave it on if it should stay private to the team.
 
 ### 4. Environment variables
 
