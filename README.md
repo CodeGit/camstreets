@@ -178,3 +178,43 @@ Unlike `link`, this requires your database password (the project's Postgres
 password, set when it was created — not the access token) and will prompt
 for it. `supabase/seed.sql` is **not** applied by `db push` — it's
 local-only by design (see [`supabase/README.md`](supabase/README.md)).
+
+### 7. Creating a superuser
+
+A superuser is a distinct role from an ordinary volunteer or school admin —
+it's marked by `app_metadata.is_superuser = true` on the `auth.users` row,
+checked via the `public.is_superuser()` function used throughout the RLS
+policies. This flag can **only** be set through Supabase's Admin API or
+dashboard, using the project's `service_role` key — never through the
+public sign-in flow (`signInWithOtp`), since a volunteer must never be able
+to grant this to themselves. There is intentionally no in-app UI for this.
+
+**Local development:**
+
+1. With the local stack running (`pnpm supabase start`), open the local
+   Studio URL it printed (`http://127.0.0.1:54323` by default).
+2. Go to **Authentication → Users → Add user → Create new user**.
+3. Enter an email (a fake one is fine — see below) and, under the user's
+   raw app metadata, set:
+   ```json
+   { "is_superuser": true }
+   ```
+4. Sign in as that user via `/login` as normal. Since `enable_confirmations`
+   is off locally and no real SMTP is configured (see `local_smtp` in
+   `supabase/config.toml`), the magic-link email never leaves the machine —
+   view it via the local email-testing UI, also on port `54324`
+   (`http://127.0.0.1:54324`), instead of a real inbox.
+
+**Hosted projects (dev/prod):** the equivalent is done from that project's
+own **Authentication → Users** page in the Supabase dashboard (or via the
+Admin API with the project's `service_role` key from a trusted server-side
+context — never expose that key to the client). Prefer testing against the
+**dev** project for this, same caution as pushing migrations above.
+
+**Testing multiple roles without multiple real inboxes:** on a hosted
+project (which does send real email), Gmail's `+` aliasing works well —
+`you+volunteer@gmail.com`, `you+admin@gmail.com`, `you+superuser@gmail.com`
+all deliver to the same real inbox but are distinct addresses as far as
+Supabase's `auth.users` is concerned, so you get isolated test accounts per
+role without juggling separate email accounts or mixing test data into your
+real one.
