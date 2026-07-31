@@ -19,17 +19,16 @@ async function fetchSchoolsFromSupabase(): Promise<School[]> {
 export default function SchoolSwitcher({
   volunteer,
   fetchSchoolsAction = fetchSchoolsFromSupabase,
+  onSchoolSelectionAction
 }: {
   volunteer: Volunteer | null;
-  // The data source is injectable for testability aand to avoid dependencies on the Supabase client when 
-  // running in a test environment or server-side rendering without hitting a real Supabase project 
-  // — real usage relies on the default.
   fetchSchoolsAction?: () => Promise<School[]>;
+  onSchoolSelectionAction?: (schoolId: number | null) => void;
 }) {
   const [schools, setSchools] = useState<School[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [defaultSchool, setDefaultSchool] = useState<number | null>(volunteer?.preferred_school_id ?? null);
-
+  
   const handleOpenChange = async (open: boolean) => {
     if (!open || schools !== null || loading) return;
 
@@ -45,10 +44,8 @@ export default function SchoolSwitcher({
   }, [])
 
   const handleValueChange = (schoolId: number | null) => {
-    console.log(`Selected school ID: ${schoolId}`);
     setDefaultSchool(schoolId);
-    // Navigation on selection is deferred until the "current school" URL
-    // shape is decided — for now this just tracks the local value.
+    onSchoolSelectionAction?.(schoolId);
   };
 
   const schoolSelectOptions:{label: string, value: number | null}[] = [ALL_SCHOOLS, ...(schools ?? []).map((school) => ({

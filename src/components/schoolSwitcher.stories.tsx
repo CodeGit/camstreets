@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { fn } from 'storybook/test'
 
 import SchoolSwitcher from './schoolSwitcher'
 
@@ -14,6 +15,7 @@ const meta: Meta<typeof SchoolSwitcher> = {
   args: {
     volunteer: null,
     fetchSchoolsAction: async () => mockSchools,
+    onSchoolSelectionAction: fn(),
   },
 } satisfies Meta<typeof SchoolSwitcher>
 
