@@ -54,9 +54,6 @@ export default function SchoolSwitcher({
   }))];
 
   const t = schoolSelectOptions.find((option) => option.value === defaultSchool) ?? null
-  console.log(`Default school ID: ${defaultSchool}`);
-  console.log(schoolSelectOptions);
-  console.log(`Default school ID: ${t?.value}, label: ${t?.label}`);
   return (
     <Select.Root
       items={schoolSelectOptions}
