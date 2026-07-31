@@ -43,8 +43,13 @@ insert into auth.users (id, email) values
   ('a0000000-0000-0000-0000-000000000001', 'vera.volunteer@example.com'),
   ('a0000000-0000-0000-0000-000000000002', 'alex.admin@example.com');
 
-insert into public.volunteers (id, display_name) values
-  ('a0000000-0000-0000-0000-000000000001', 'Vera');
+-- The on_auth_user_created trigger already created a volunteers row for
+-- Vera (with display_name defaulted to her email prefix) the moment the
+-- auth.users insert above ran — this just gives the seed data a nicer name,
+-- same as a real user renaming themselves after signup.
+update public.volunteers
+set display_name = 'Vera'
+where id = 'a0000000-0000-0000-0000-000000000001';
 
 insert into public.school_admins (school_id, user_id) values (
   (select id from public.schools where name = 'Newnham Croft Primary'),
