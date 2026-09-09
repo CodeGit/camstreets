@@ -4,9 +4,9 @@ import { fn } from 'storybook/test'
 import SchoolSwitcher from './schoolSwitcher'
 
 const mockSchools = [
-  { id: 1, name: 'Newnham Croft Primary', address: null, active: true, created_at: '' },
-  { id: 2, name: 'St Matthew\'s Primary', address: null, active: true, created_at: '' },
-  { id: 3, name: 'Trumpington Park Primary', address: null, active: true, created_at: '' },
+  { id: 1, name: 'Newnham Croft Primary', street: null, town: null, active: true, created_at: '' },
+  { id: 2, name: 'St Matthew\'s Primary', street: null, town: null, active: true, created_at: '' },
+  { id: 3, name: 'Trumpington Park Primary', street: null, town: null, active: true, created_at: '' },
 ]
 
 const meta: Meta<typeof SchoolSwitcher> = {

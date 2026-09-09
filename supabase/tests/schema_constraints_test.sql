@@ -62,11 +62,14 @@ select throws_ok(
   'term end_date before start_date is rejected'
 );
 
--- terms (school_id, name) must be unique
+-- terms (school_id, name) must be unique. Named to avoid colliding with
+-- on_default_term_created (20260909123828), which auto-creates "Autumn 1
+-- 2026" etc. for every school the moment it's inserted, from seed.sql's
+-- default_terms rows.
 insert into public.terms (school_id, name, start_date, end_date)
 values (
   (select id from public.schools where name = 'Test School'),
-  'Autumn 1 2026', '2026-09-01', '2026-10-23'
+  'Uniqueness Test Term', '2026-09-01', '2026-10-23'
 );
 
 select throws_ok(
@@ -74,7 +77,7 @@ select throws_ok(
     insert into public.terms (school_id, name, start_date, end_date)
     values (
       (select id from public.schools where name = 'Test School'),
-      'Autumn 1 2026', '2026-11-01', '2026-12-01'
+      'Uniqueness Test Term', '2026-11-01', '2026-12-01'
     )
   $$,
   '23505',
@@ -88,7 +91,7 @@ select lives_ok(
     insert into public.terms (school_id, name, start_date, end_date)
     values (
       (select id from public.schools where name = 'Another School'),
-      'Autumn 1 2026', '2026-09-01', '2026-10-23'
+      'Uniqueness Test Term', '2026-09-01', '2026-10-23'
     )
   $$,
   'same term name is fine for a different school'

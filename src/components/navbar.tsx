@@ -35,16 +35,10 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
     </Link>
 );
 
-  const superUserBadge: JSX.Element = volunteer?.is_superuser ? (
-    <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded">
-      Superuser
-    </span>
-  ) : <></>;
-
-  const adminBadge: JSX.Element = volunteer?.is_admin ? (
-    <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded">
-      Admin
-    </span>
+  const dashboardLink: JSX.Element = volunteer ? (
+    <Link href="/dashboard" className={buttonVariants({ variant: "outline", size: "sm" })}>
+      Dashboard
+    </Link>
   ) : <></>;
 
   return (
@@ -54,8 +48,7 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
         <SchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
       </div>
       <div className="flex items-center gap-2">
-        {adminBadge}
-        {superUserBadge}
+        {dashboardLink}
         {logStatusButton}
       </div>
     </nav>

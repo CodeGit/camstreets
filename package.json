@@ -9,7 +9,11 @@
     "lint": "eslint",
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "db:start": "supabase start && bash scripts/kong-fix.sh",
+    "db:reset": "supabase db reset && bash scripts/kong-fix.sh",
+    "db:stop": "supabase stop",
+    "kong:fix": "bash scripts/kong-fix.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -25,13 +25,16 @@ export async function getMagicLinkFor(email: string): Promise<string> {
 
   const messageRes = await fetch(`${MAILPIT_URL}/api/v1/message/${messageId}`);
   const message = await messageRes.json();
-  const linkMatch: RegExpMatchArray | null = message.Text.match(
-    /\(\s*(http\S+?)\s*\)/
+  // Reads the real href out of the rendered HTML rather than pattern-matching
+  // the plain-text body, so this doesn't depend on the email template's
+  // wording (e.g. a link being parenthesised) — see supabase/templates/magic_link.html.
+  const linkMatch: RegExpMatchArray | null = message.HTML.match(
+    /href="([^"]+)"/
   );
 
   if (!linkMatch) {
     throw new Error("Could not find magic link in email body");
   }
 
-  return linkMatch[1];
+  return linkMatch[1].replace(/&amp;/g, "&");
 }

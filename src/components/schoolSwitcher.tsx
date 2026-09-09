@@ -10,20 +10,46 @@ type School = Tables<"schools">;
 
 const ALL_SCHOOLS = { label: "All Schools", value: null };
 
-async function fetchSchoolsFromSupabase(): Promise<School[]> {
+type FetchSchoolsActionType = (volunteerId: string | null) => Promise<School[]>;
+
+export const fetchAllSchoolsFromSupabase: FetchSchoolsActionType = async (volunteerId) => {
   const supabase = createClient();
   const { data } = await supabase.from("schools").select("*").order("name");
+  return data ?? [];
+};
+
+export const fetchAdminSchoolsFromSupabase: FetchSchoolsActionType = async (volunteerId) => {
+  if (!volunteerId) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("schools")
+    .select("*, school_admins!inner(*)")
+    .eq("school_admins.volunteer_id", volunteerId)
+    .order("name");
+  return data ?? [];
+}
+
+export const fetchVolunteerSchoolsFromSupabase: FetchSchoolsActionType = async (volunteerId) => {
+  if (!volunteerId) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("schools")
+    .select("*, volunteer_schools!inner(*)")
+    .eq("volunteer_schools.volunteer_id", volunteerId)
+    .order("name");
   return data ?? [];
 }
 
 export default function SchoolSwitcher({
   volunteer,
-  fetchSchoolsAction = fetchSchoolsFromSupabase,
-  onSchoolSelectionAction
+  fetchSchoolsAction = fetchAllSchoolsFromSupabase,
+  onSchoolSelectionAction,
+  showAllSchoolsOption = true,
 }: {
   volunteer: Volunteer | null;
-  fetchSchoolsAction?: () => Promise<School[]>;
+  fetchSchoolsAction?: FetchSchoolsActionType;
   onSchoolSelectionAction?: (schoolId: number | null) => void;
+  showAllSchoolsOption?: boolean;
 }) {
   const [schools, setSchools] = useState<School[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,27 +59,42 @@ export default function SchoolSwitcher({
     if (!open || schools !== null || loading) return;
 
     setLoading(true);
-    const data = await fetchSchoolsAction();
+    const data = await fetchSchoolsAction(volunteer?.id ?? null);
     setSchools(data);
     setLoading(false);
   };
 
+  // fetch schools when the component mounts if the schools are not already loaded and the default school is not set or if the "All Schools" option is not shown.
   useEffect(() => {
-    if (defaultSchool === null || schools !== null) return;
-    handleOpenChange(true);
+    if (schools !== null) return;
+    if (defaultSchool !== null || !showAllSchoolsOption) {
+      handleOpenChange(true);
+    }
   }, [])
+
+  // this is required when filtering schools for admins/volunteer dashboards.
+  useEffect(() => {
+    if (!schools || schools.length === 0) return;
+    const preferredId = volunteer?.preferred_school_id ?? null;
+    const preferredIdIsInList = preferredId !== null && schools.some((s) => s.id === preferredId);
+    if (preferredIdIsInList) {
+      setDefaultSchool(preferredId);
+    } else if (!showAllSchoolsOption) {
+      setDefaultSchool(schools[0].id);
+    }
+  }, [schools]);
 
   const handleValueChange = (schoolId: number | null) => {
     setDefaultSchool(schoolId);
     onSchoolSelectionAction?.(schoolId);
   };
 
-  const schoolSelectOptions:{label: string, value: number | null}[] = [ALL_SCHOOLS, ...(schools ?? []).map((school) => ({
+  const schoolOptions = (schools ?? []).map((school) => ({
     label: school.name,
     value: school.id,
-  }))];
-
-  const t = schoolSelectOptions.find((option) => option.value === defaultSchool) ?? null
+  }));
+  const schoolSelectOptions:{label: string, value: number | null}[] = showAllSchoolsOption ? [ALL_SCHOOLS, ...schoolOptions] : schoolOptions;
+  
   return (
     <Select.Root
       items={schoolSelectOptions}

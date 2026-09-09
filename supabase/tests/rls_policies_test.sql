@@ -7,12 +7,20 @@ insert into public.schools (name) values ('School A'), ('School B');
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'admin-a@test.com'),
   ('22222222-2222-2222-2222-222222222222', 'admin-b@test.com'),
-  ('33333333-3333-3333-3333-333333333333', 'volunteer-1@test.com');
+  ('33333333-3333-3333-3333-333333333333', 'volunteer-1@test.com'),
+  ('44444444-4444-4444-4444-444444444444', 'super-s@test.com');
 
-insert into public.school_admins (school_id, user_id) values
+update public.volunteers set is_superuser = true
+where id = '44444444-4444-4444-4444-444444444444';
+
+insert into public.school_admins (school_id, volunteer_id) values
   ((select id from public.schools where name = 'School A'), '11111111-1111-1111-1111-111111111111'),
   ((select id from public.schools where name = 'School B'), '22222222-2222-2222-2222-222222222222');
 
+-- on_default_term_created (20260909123828) also auto-creates terms for
+-- School A/B from seed.sql's default_terms rows the moment they're
+-- inserted above — the queries below filter by name to isolate these two
+-- fixture rows from that automatic set rather than assert on both.
 insert into public.terms (school_id, name, start_date, end_date, status) values
   ((select id from public.schools where name = 'School A'), 'Published Term', '2026-09-01', '2026-10-23', 'published'),
   ((select id from public.schools where name = 'School A'), 'Draft Term', '2027-01-05', '2027-02-12', 'draft');
@@ -22,6 +30,7 @@ set local role anon;
 select results_eq(
   $$ select name from public.terms
     where school_id in (select id from public.schools where name in ('School A', 'School B'))
+      and name in ('Draft Term', 'Published Term')
     order by name $$,
   ARRAY['Published Term'],
   'anon only sees published terms'
@@ -34,6 +43,7 @@ set local request.jwt.claims to '{"sub": "11111111-1111-1111-1111-111111111111"}
 select results_eq(
   $$ select name from public.terms
     where school_id in (select id from public.schools where name in ('School A', 'School B'))
+      and name in ('Draft Term', 'Published Term')
     order by name $$,
   ARRAY['Draft Term', 'Published Term'],
   'school A admin sees both their draft and published terms'
@@ -44,16 +54,18 @@ set local request.jwt.claims to '{"sub": "22222222-2222-2222-2222-222222222222"}
 select results_eq(
   $$ select name from public.terms
     where school_id in (select id from public.schools where name in ('School A', 'School B'))
+      and name in ('Draft Term', 'Published Term')
     order by name $$,
   ARRAY['Published Term'],
   'school B admin does not see school A''s draft term'
 );
 
 -- Test 4: a superuser sees everything regardless of school
-set local request.jwt.claims to '{"sub": "33333333-3333-3333-3333-333333333333", "app_metadata": {"is_superuser": true}}';
+set local request.jwt.claims to '{"sub": "44444444-4444-4444-4444-444444444444"}';
 select results_eq(
   $$ select name from public.terms
     where school_id in (select id from public.schools where name in ('School A', 'School B'))
+      and name in ('Draft Term', 'Published Term')
     order by name $$,
   ARRAY['Draft Term', 'Published Term'],
   'superuser sees all terms regardless of school'
@@ -81,6 +93,10 @@ select is(
 );
 
 -- Test 7: a user can create their own volunteer profile
+-- (the on_auth_user_created trigger already gave this user a row when they
+-- were inserted into auth.users above; delete it first so this actually
+-- exercises the insert policy instead of colliding with it)
+delete from public.volunteers where id = '33333333-3333-3333-3333-333333333333';
 set local role authenticated;
 set local request.jwt.claims to '{"sub": "33333333-3333-3333-3333-333333333333"}';
 select lives_ok(

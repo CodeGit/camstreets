@@ -204,7 +204,12 @@ anonymous_users = 30
 # Number of sessions that can be refreshed in a 5 minute interval per IP address.
 token_refresh = 150
 # Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
-sign_in_sign_ups = 30
+# Raised from the default (30) for local dev: the e2e suite reuses a
+# handful of seeded accounts (superuser@/admin@/volunteer@example.com)
+# across multiple spec files running in parallel, which can legitimately
+# exceed the default within a 5-minute window. Local-stack only — has no
+# effect on hosted dev/prod, which aren't configured from this file.
+sign_in_sign_ups = 300
 # Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
 token_verifications = 30
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
@@ -226,8 +231,11 @@ double_confirm_changes = true
 enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
-# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+# Lowered from the default (1s) for local dev: this throttles *all*
+# outgoing auth emails, not just repeats to the same address, which the
+# e2e suite's parallel workers can hit even across different seeded
+# accounts. Local-stack only.
+max_frequency = "1ms"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
@@ -242,6 +250,10 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+[auth.email.template.magic_link]
+subject = "Your sign-in link"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

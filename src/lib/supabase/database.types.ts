@@ -34,6 +34,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      default_terms: {
+        Row: {
+          created_at: string
+          end_date: string
+          half_term_end: string
+          half_term_start: string
+          id: number
+          name: string
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          half_term_end: string
+          half_term_start: string
+          id?: never
+          name: string
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          half_term_end?: string
+          half_term_start?: string
+          id?: never
+          name?: string
+          start_date?: string
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           active: boolean
@@ -69,21 +99,56 @@ export type Database = {
           },
         ]
       }
+      off_days: {
+        Row: {
+          created_at: string
+          date: string
+          id: number
+          label: string | null
+          school_id: number | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: never
+          label?: string | null
+          school_id?: number | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: never
+          label?: string | null
+          school_id?: number | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "off_days_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_admins: {
         Row: {
           created_at: string
           school_id: number
-          user_id: string
+          volunteer_id: string
         }
         Insert: {
           created_at?: string
           school_id: number
-          user_id: string
+          volunteer_id: string
         }
         Update: {
           created_at?: string
           school_id?: number
-          user_id?: string
+          volunteer_id?: string
         }
         Relationships: [
           {
@@ -93,29 +158,39 @@ export type Database = {
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "school_admins_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       schools: {
         Row: {
           active: boolean
-          address: string | null
           created_at: string
           id: number
           name: string
+          street: string | null
+          town: string | null
         }
         Insert: {
           active?: boolean
-          address?: string | null
           created_at?: string
           id?: never
           name: string
+          street?: string | null
+          town?: string | null
         }
         Update: {
           active?: boolean
-          address?: string | null
           created_at?: string
           id?: never
           name?: string
+          street?: string | null
+          town?: string | null
         }
         Relationships: []
       }
@@ -287,6 +362,39 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_schools: {
+        Row: {
+          created_at: string
+          school_id: number
+          volunteer_id: string
+        }
+        Insert: {
+          created_at?: string
+          school_id: number
+          volunteer_id: string
+        }
+        Update: {
+          created_at?: string
+          school_id?: number
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_schools_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_schools_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
             referencedColumns: ["id"]
           },
         ]

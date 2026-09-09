@@ -8,7 +8,7 @@ below.
 ## Entities
 
 ```
-schools ─┬─< school_admins >─ auth.users
+schools ─┬─< school_admins >─ volunteers
          └─< locations ─< slots ─< slot_instances >─< signups >─ volunteers
                                         ^
                                         │
@@ -17,8 +17,8 @@ schools ─┬─< school_admins >─ auth.users
 
 - **`schools`** — a participating school. `active` retires a school without
   deleting historical data.
-- **`school_admins`** — join table granting a user (`auth.users.id`) admin
-  rights over one specific school. Many-to-many: one person can admin
+- **`school_admins`** — join table granting a volunteer (`volunteers.id`)
+  admin rights over one specific school. Many-to-many: one person can admin
   several schools, one school can have several admins.
 - **`locations`** — a physical point at a school needing volunteers (e.g. a
   specific road closure or crossing point). A school can have several.

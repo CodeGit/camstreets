@@ -11,7 +11,7 @@ Task list for building the core feature: volunteers signing up to cover school s
 - [x] pgTAP tests for constraints and RLS
 - [x] Seed script (`supabase/seed.sql`) for local/dev testing
 - [x] Supabase Auth: email/magic-link sign-in for volunteers
-- [ ] Session-refresh middleware (`@supabase/ssr` needs this so sessions don't silently expire ~hourly — flagged, not yet built)
+- [x] Session-refresh proxy (`src/proxy.ts`) — refreshes the session on every request via `@supabase/ssr` + `getClaims()`, so it doesn't silently expire ~hourly. Named `proxy.ts` not `middleware.ts`: Next.js 16 renamed the file convention (deprecated `middleware`/`export function middleware`, replaced by `proxy`/`export function proxy`)
 
 ## 3. Frontend (Next.js)
 - [x] Auth pages: sign in (magic link) + sign out
@@ -24,8 +24,11 @@ Task list for building the core feature: volunteers signing up to cover school s
 ## 4. Admin controls
 - [ ] Admin dashboard: coverage overview across a school's locations/slots, flag empty (red) and partially-covered (yellow) slot instances
 - [ ] Manage schools/locations/slots (school admins only, per existing RLS)
-- [ ] Publish a term: expand a term's `slots` into dated `slot_instances`, excluding UK bank holidays. This is Next.js application code (a Server Action), not a SQL function — see reasoning in past design discussion: needs an external bank-holiday data source (`https://www.gov.uk/bank-holidays.json`), which doesn't fit cleanly inside a DB transaction
+- [ ] Publish a term: expand a term's `slots` into dated `slot_instances`, excluding dates in `off_days` (bank holidays with `school_id null`, plus that school's own `inset_day` rows — see `20260909102854_add_off_days.sql`). Superseded the earlier plan to fetch bank holidays live from `gov.uk/bank-holidays.json` at publish time — storing them means publishing a term has no external dependency, at the cost of needing manual upkeep (see the maintenance item below)
+- [ ] **Recurring task, not a one-off**: keep `off_days` bank-holiday rows (`type = 'bank_holiday'`) in sync with gov.uk. Most years this is just adding the next academic year's fixed set ahead of time, but ad-hoc extra bank holidays (a monarch's death, a coronation, a jubilee) are announced with no fixed schedule and won't appear automatically — check https://www.gov.uk/bank-holidays whenever one might plausibly have been announced, not just annually
 - [ ] Admins do not invite/assign volunteers directly — that's volunteer-initiated (see §5)
+- [x] A school's first admin is granted automatically: whoever is the first volunteer to join it (via `volunteer_schools`) becomes an admin (`20260908200211_promote_first_school_volunteer_to_admin.sql`). Superusers don't need to assign an admin manually or invite one by email when creating a school — admin status can still be added/transferred afterward via the existing `school_admins` RLS (an admin manages their own school's admin list)
+- [x] Default term dates (`default_terms`) and off days (`off_days`: bank holidays + per-school inset days) — superuser/admin-managed reference tables to pre-populate a school's own `terms`, rather than typing the same UK-wide dates in from scratch each time (`20260909102421_add_default_terms.sql`, `20260909102854_add_off_days.sql`)
 
 ## 5. Volunteer commitments
 Volunteers log in and see the **current best calendar**, then choose how to help fill gaps. Three ways to commit:
