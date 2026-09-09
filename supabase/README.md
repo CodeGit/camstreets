@@ -26,10 +26,14 @@ schools ─┬─< school_admins >─ volunteers
   time, a label (e.g. "AM drop-off"), and a `capacity` (suggested number of
   volunteers, not a hard cap).
 - **`terms`** — a date range belonging to one school (e.g. "Autumn 1 2026").
-  Starts as `draft`; only once `published` does it generate real dates.
-  Modelled as UK-style half-terms (Autumn 1/2, Spring 1/2, Summer 1/2) so
-  half-term breaks are just the gaps between term rows, not an exception
-  inside one.
+  Real dates from the moment it exists — `on_default_term_created`
+  (`20260909123828_propagate_default_terms_to_schools.sql`) backfills every
+  school automatically as soon as a superuser adds a year to `default_terms`,
+  so there's no separate "not ready yet" state to gate: a term's own
+  `start_date`/`end_date` already say whether it's past, current or
+  upcoming. Modelled as UK-style half-terms (Autumn 1/2, Spring 1/2, Summer
+  1/2) so half-term breaks are just the gaps between term rows, not an
+  exception inside one.
 - **`slot_instances`** — a `slot` expanded onto one concrete `date` within a
   `term`. `start_time`, `end_time`, and `capacity` are **snapshotted** from
   the parent `slot` at generation time, so editing a template later doesn't
@@ -44,12 +48,11 @@ schools ─┬─< school_admins >─ volunteers
   the app compares the count against `slot_instances.capacity` to show
   progress (it's a suggested number, not enforced).
 
-Generating `slot_instances` from a published term (expanding weekly slots
-into dated rows, including bank-holiday exclusion) is deliberately **not** a
-database function — it happens in application code (Next.js Server Action),
-since it depends on an external bank-holiday data source and is triggered by
-one specific user action rather than needing to run atomically inside the
-database.
+Generating `slot_instances` for a term (expanding weekly slots into dated
+rows, excluding `off_days`) is deliberately **not** a database function — it
+happens in application code (Next.js Server Action), since it's triggered by
+one specific admin action rather than needing to run atomically inside the
+database. Not yet built — see `TODO.md` §4.
 
 ## Roles
 
@@ -74,8 +77,8 @@ Three tiers, checked via two helper functions (`is_superuser()`,
 | `locations` | everyone | school admin or superuser, full CRUD |
 | `slots` | everyone | school admin or superuser, full CRUD |
 | `school_admins` | that school's admins + superuser | school admin manages their own school's admin list (including removing themselves — no "last admin" guard at the DB level; that's a Next.js-level check) |
-| `terms` | `published` only, publicly; admins also see their own school's `draft`/`archived` | school admin or superuser, full CRUD |
-| `slot_instances` | only if parent term is `published` | school admin or superuser (resolved via `slot → location → school`) |
+| `terms` | everyone | school admin or superuser, full CRUD |
+| `slot_instances` | everyone | school admin or superuser (resolved via `slot → location → school`) |
 | `volunteers` | everyone (just `display_name`, intentionally public — see below) | self only |
 | `signups` | everyone | volunteer signs up/cancels their own; school admin can also cancel signups for their own school's slots |
 
@@ -86,10 +89,10 @@ Notes on some of the less obvious calls:
   no phone, no email duplicated from `auth.users`. If more fields are added
   later, revisit whether they should stay admin/self-only.
 - **Multiple RLS policies on the same command are OR'd together**, not a
-  fallback chain. E.g. `terms` has a "published is public" policy and a
-  "school admin sees their own school's rows" policy — both apply
-  simultaneously, so an admin sees strictly more than the public, not a
-  different view.
+  fallback chain. `terms`/`slot_instances` reads are unconditionally public
+  (`using (true)`), but writes still OR a separate "school admin or
+  superuser" policy on top — read and write are governed by different
+  policies on the same table, not one combined rule.
 - **`slots`/`slot_instances` admin checks require a subquery** to resolve
   the owning school, since neither table stores `school_id` directly (they
   only have `location_id` / `slot_id`).

@@ -33,11 +33,11 @@ function formatLong(iso: string) {
 
 export default function DaySchedule({
   date,
-  hasPublishedTerm,
+  hasTerm,
   instances,
 }: {
   date: string;
-  hasPublishedTerm: boolean;
+  hasTerm: boolean;
   instances: ScheduleInstance[];
 }) {
   return (
@@ -62,11 +62,11 @@ export default function DaySchedule({
         </div>
       </div>
 
-      {!hasPublishedTerm && (
-        <p className="text-muted-foreground">No published term covers this date.</p>
+      {!hasTerm && (
+        <p className="text-muted-foreground">No term covers this date.</p>
       )}
 
-      {hasPublishedTerm && instances.length === 0 && (
+      {hasTerm && instances.length === 0 && (
         <p className="text-muted-foreground">
           No crossing patrol slots scheduled for this day.
         </p>

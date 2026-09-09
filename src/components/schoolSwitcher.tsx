@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 type Volunteer = Tables<"volunteers">;
 type School = Tables<"schools">;
 
-const ALL_SCHOOLS = { label: "All Schools", value: null };
+const NO_SCHOOL_SELECTED = { label: "Select a school from the list...", value: null };
 
 type FetchSchoolsActionType = (volunteerId: string | null) => Promise<School[]>;
 
@@ -93,7 +93,7 @@ export default function SchoolSwitcher({
     label: school.name,
     value: school.id,
   }));
-  const schoolSelectOptions:{label: string, value: number | null}[] = showAllSchoolsOption ? [ALL_SCHOOLS, ...schoolOptions] : schoolOptions;
+  const schoolSelectOptions:{label: string, value: number | null}[] = showAllSchoolsOption ? [NO_SCHOOL_SELECTED, ...schoolOptions] : schoolOptions;
   
   return (
     <Select.Root

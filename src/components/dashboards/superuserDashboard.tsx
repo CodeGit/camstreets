@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
 import WelcomeHeading from "@/components/dashboards/welcomeHeading";
 import SchoolList from "../schools/schoolList";
-import VolunteerList from "../schools/volunteerList";
+import SchoolManagementTabs from "../schools/schoolManagementTabs";
 import DefaultTerms from "../terms/defaultTerms";
 import BankHolidays from "../terms/bankHolidays";
 
@@ -30,7 +30,7 @@ export default async function SuperuserDashboard({
       <Tabs defaultValue="schools">
         <TabsList>
           <TabsTab value="schools">Schools</TabsTab>
-          <TabsTab value="terms">Terms</TabsTab>
+          <TabsTab value="terms">Default school year</TabsTab>
         </TabsList>
 
         <TabsPanel value="schools" className="space-y-4">
@@ -42,7 +42,7 @@ export default async function SuperuserDashboard({
           </div>
           <SchoolList schools={schools ?? []} />
           {selectedSchoolId && (
-            <VolunteerList schoolId={selectedSchoolId} error={volunteerListError} />
+            <SchoolManagementTabs schoolId={selectedSchoolId} volunteerListError={volunteerListError} />
           )}
         </TabsPanel>
 

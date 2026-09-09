@@ -28,7 +28,7 @@ select lives_ok(
     insert into public.slots (location_id, day_of_week, start_time, end_time, label)
     values (
       (select id from public.locations where name = 'Test Location'),
-      1, '08:00', '08:30', 'Monday AM'
+      1, '08:00', '08:30', 'Monday morning'
     )
   $$,
   'day_of_week within 0-6 is accepted'

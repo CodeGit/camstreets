@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 
@@ -25,7 +26,7 @@ export default async function Home() {
           <CardTitle>camstreets</CardTitle>
           <CardDescription>
             {user
-              ? `Signed in as ${user.email}`
+              ? "Please select a school from the button above to volunteer for a time slot."
               : "Cambridge school streets volunteer calendar"}
           </CardDescription>
         </CardHeader>

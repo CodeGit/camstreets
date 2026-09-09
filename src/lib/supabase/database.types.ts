@@ -336,7 +336,6 @@ export type Database = {
           name: string
           school_id: number
           start_date: string
-          status: string
         }
         Insert: {
           created_at?: string
@@ -345,7 +344,6 @@ export type Database = {
           name: string
           school_id: number
           start_date: string
-          status?: string
         }
         Update: {
           created_at?: string
@@ -354,7 +352,6 @@ export type Database = {
           name?: string
           school_id?: number
           start_date?: string
-          status?: string
         }
         Relationships: [
           {

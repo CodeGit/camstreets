@@ -77,13 +77,13 @@ type Story = StoryObj<typeof meta>
 export const FullyStaffed: Story = {
   args: {
     date: '2026-09-07',
-    hasPublishedTerm: true,
+    hasTerm: true,
     instances: [
       mockInstance({
         id: 1,
         locationId: 1,
         locationName: 'Newnham Road crossing point',
-        label: 'AM drop-off',
+        label: 'Morning drop-off',
         startTime: '08:15:00',
         endTime: '08:45:00',
         volunteers: [vera, alex],
@@ -92,7 +92,7 @@ export const FullyStaffed: Story = {
         id: 2,
         locationId: 1,
         locationName: 'Newnham Road crossing point',
-        label: 'PM pickup',
+        label: 'Afternoon pickup',
         startTime: '15:00:00',
         endTime: '15:30:00',
         volunteers: [vera, alex],
@@ -104,13 +104,13 @@ export const FullyStaffed: Story = {
 export const NeedsVolunteers: Story = {
   args: {
     date: '2026-09-08',
-    hasPublishedTerm: true,
+    hasTerm: true,
     instances: [
       mockInstance({
         id: 3,
         locationId: 1,
         locationName: 'Newnham Road crossing point',
-        label: 'AM drop-off',
+        label: 'Morning drop-off',
         startTime: '08:15:00',
         endTime: '08:45:00',
         volunteers: [vera],
@@ -119,7 +119,7 @@ export const NeedsVolunteers: Story = {
         id: 4,
         locationId: 2,
         locationName: 'Grantchester Street crossing',
-        label: 'PM pickup',
+        label: 'Afternoon pickup',
         startTime: '15:00:00',
         endTime: '15:30:00',
         volunteers: [],
@@ -131,7 +131,7 @@ export const NeedsVolunteers: Story = {
 export const NoSlotsToday: Story = {
   args: {
     date: '2026-09-12',
-    hasPublishedTerm: true,
+    hasTerm: true,
     instances: [],
   },
 }
@@ -139,7 +139,7 @@ export const NoSlotsToday: Story = {
 export const NoPublishedTerm: Story = {
   args: {
     date: '2027-01-04',
-    hasPublishedTerm: false,
+    hasTerm: false,
     instances: [],
   },
 }

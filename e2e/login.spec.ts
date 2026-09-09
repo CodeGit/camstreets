@@ -26,7 +26,9 @@ test("magic link sign-in and sign-out", async ({ page }) => {
   await page.goto(magicLink);
 
   await expect(page).toHaveURL("/");
-  await expect(page.getByText(`Signed in as ${email}`)).toBeVisible();
+  await expect(
+    page.getByText("Please select a school from the button above to volunteer for a time slot.")
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Sign out" }).click();
 

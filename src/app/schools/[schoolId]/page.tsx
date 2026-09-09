@@ -33,7 +33,6 @@ export default async function SchoolPage({
     .from("terms")
     .select("id, name")
     .eq("school_id", schoolIdNum)
-    .eq("status", "published")
     .lte("start_date", date)
     .gte("end_date", date)
     .maybeSingle();
@@ -55,7 +54,7 @@ export default async function SchoolPage({
   return (
     <div className="px-4 py-4 space-y-4">
       <h1 className="text-2xl font-semibold text-foreground">{school.name}</h1>
-      <DaySchedule date={date} hasPublishedTerm={!!term} instances={instances ?? []} />
+      <DaySchedule date={date} hasTerm={!!term} instances={instances ?? []} />
     </div>
   );
 }

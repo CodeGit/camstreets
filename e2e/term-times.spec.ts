@@ -17,7 +17,7 @@ test("superuser can add a whole academic year of default terms in one submission
 }) => {
   await signInAs(page, "superuser@example.com");
   await page.goto("/dashboard");
-  await page.getByRole("tab", { name: "Terms" }).click();
+  await page.getByRole("tab", { name: "Default school year" }).click();
 
   // no per-term/per-season add form — just "Add a year"
   await expect(page.getByText("Add a year")).toBeVisible();
@@ -81,7 +81,7 @@ test("a school's terms are auto-populated from default_terms and editable in pla
 }) => {
   await signInAs(page, "admin@example.com");
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Newnham Croft Primary" }).click();
+  // The admin's only school (Newnham Croft Primary) is auto-selected.
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // populated automatically (on_default_term_created), not by a form
@@ -163,7 +163,7 @@ test("a new school is automatically backfilled with terms from existing default 
 test("bank holidays outside term time are filtered out of the collapsible", async ({ page }) => {
   await signInAs(page, "admin@example.com");
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Newnham Croft Primary" }).click();
+  // The admin's only school (Newnham Croft Primary) is auto-selected.
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // Christmas Day / Boxing Day / New Year's Day fall in the Christmas
@@ -184,7 +184,7 @@ test("inset days table is compact with numbered rows, scoped per academic year, 
 }) => {
   await signInAs(page, "admin@example.com");
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Newnham Croft Primary" }).click();
+  // The admin's only school (Newnham Croft Primary) is auto-selected.
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // each academic year gets its own "Add inset days" section, not one
