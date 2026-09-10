@@ -7,10 +7,18 @@ import VolunteerDashboard from "@/components/dashboards/volunteerDashboard";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ school?: string; error?: string }>;
+  searchParams: Promise<{
+    school?: string;
+    error?: string;
+    tab?: string;
+    myCalendarSchool?: string;
+    date?: string;
+    view?: string;
+  }>;
 }) {
-  const { school, error } = await searchParams;
+  const { school, error, tab, myCalendarSchool, date, view } = await searchParams;
   const selectedSchoolId = school ? parseInt(school, 10) : undefined;
+  const myCalendarSchoolId = myCalendarSchool ? parseInt(myCalendarSchool, 10) : undefined;
 
   const supabase = await createClient();
   const {
@@ -33,6 +41,10 @@ export default async function DashboardPage({
         volunteer={volunteer}
         selectedSchoolId={selectedSchoolId}
         volunteerListError={error}
+        activeTab={tab}
+        myCalendarSchoolId={myCalendarSchoolId}
+        date={date}
+        view={view}
       />
     );
   }
@@ -42,8 +54,14 @@ export default async function DashboardPage({
         volunteer={volunteer}
         selectedSchoolId={selectedSchoolId}
         volunteerListError={error}
+        activeTab={tab}
+        myCalendarSchoolId={myCalendarSchoolId}
+        date={date}
+        view={view}
       />
     );
   }
-  return <VolunteerDashboard volunteer={volunteer} />;
+  return (
+    <VolunteerDashboard volunteer={volunteer} selectedSchoolId={selectedSchoolId} date={date} view={view} />
+  );
 }

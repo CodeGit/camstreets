@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 const SEASONS = ["autumn", "spring", "summer"] as const;
 
 // Creates a whole academic year (all 3 terms, 12 dates) in one submission
-// — replaces the earlier one-season-at-a-time default_terms form. No
+// - replaces the earlier one-season-at-a-time default_terms form. No
 // per-term add/edit here by design: a school gets its own terms
 // automatically from these (see the on_default_term_created trigger) and
 // edits them there if it needs to diverge, so default_terms itself only

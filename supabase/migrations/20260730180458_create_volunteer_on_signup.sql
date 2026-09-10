@@ -8,7 +8,7 @@
 -- auth-user-creation process, not as the new user's own authenticated
 -- session, so the ordinary "volunteers can create their own profile"
 -- RLS policy (with check (auth.uid() = id)) wouldn't apply/match here.
--- Safe as definer because the insert is hardcoded to new.id — there's no
+-- Safe as definer because the insert is hardcoded to new.id - there's no
 -- parameter to direct it at anyone else's profile.
 create or replace function public.handle_new_user()
 returns trigger

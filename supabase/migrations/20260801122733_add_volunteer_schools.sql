@@ -1,5 +1,5 @@
 -- Which school(s) a volunteer has chosen to help at. Previously there was no
--- such concept — any volunteer could sign up for a slot at any school — this
+-- such concept - any volunteer could sign up for a slot at any school - this
 -- both scopes the navbar's school switcher to a volunteer's own schools and
 -- (below) restricts sign-ups to them, cutting down on picking the wrong
 -- school by accident.

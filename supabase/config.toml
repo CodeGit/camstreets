@@ -196,7 +196,11 @@ password_requirements = ""
 
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
-email_sent = 2
+# Raised from the default (2) for local dev, same rationale as
+# sign_in_sign_ups below: every e2e magic-link sign-in sends one of these
+# against a handful of reused seeded accounts, so 2/hour is exhausted almost
+# immediately during iterative testing. Local-stack only.
+email_sent = 300
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
 sms_sent = 30
 # Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
@@ -207,7 +211,7 @@ token_refresh = 150
 # Raised from the default (30) for local dev: the e2e suite reuses a
 # handful of seeded accounts (superuser@/admin@/volunteer@example.com)
 # across multiple spec files running in parallel, which can legitimately
-# exceed the default within a 5-minute window. Local-stack only — has no
+# exceed the default within a 5-minute window. Local-stack only - has no
 # effect on hosted dev/prod, which aren't configured from this file.
 sign_in_sign_ups = 300
 # Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
@@ -386,8 +390,8 @@ allow_dynamic_registration = false
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.
-# `per_worker` (default) — enables hot reload during local development.
-# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
+# `per_worker` (default) - enables hot reload during local development.
+# `oneshot` - fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
 policy = "per_worker"
 # Port to attach the Chrome inspector for debugging edge functions.
 inspector_port = 8083
@@ -398,7 +402,11 @@ deno_version = 2
 # secret_key = "env(SECRET_VALUE)"
 
 [analytics]
-enabled = true
+# Temporarily off to cut the local stack's background disk I/O (the
+# vector/analytics containers continuously ship and index every
+# container's logs for Studio's log viewer, even when Studio's closed).
+# Re-enable by flipping this back to true when done.
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

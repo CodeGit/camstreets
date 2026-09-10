@@ -1,0 +1,44 @@
+name: Reset demo data
+
+# Nightly wipe-and-reseed of dev.camstreets.org's 3 public demo schools
+# (scripts/seed-demo.mjs), so the demo self-heals from whatever a public
+# visitor did via the self-service "become an admin" button
+# (src/app/dashboard/actions.ts's becomeDemoAdmin) - a school renamed,
+# volunteers removed, terms edited, etc. Runs independently of any Vercel
+# deployment, so it needs its own copy of the dev project's URL/service-
+# role key as repo secrets, separate from Vercel's own env vars.
+#
+# Required repo secrets (Settings > Secrets and variables > Actions):
+#   DEMO_SUPABASE_URL               - the dev project's URL
+#                                      (https://snquofgpzpjguluglbif.supabase.co)
+#   DEMO_SUPABASE_SERVICE_ROLE_KEY  - that project's service-role key
+#   DEMO_SUPERUSER_EMAIL            - the real email seeded as demo
+#                                      superuser - a secret, not a repo
+#                                      variable, since it's personal
+
+on:
+  schedule:
+    # 04:00 UTC - outside any plausible demo-visiting hours.
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  reset-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      # --prod: only scripts/seed-demo.mjs's own runtime dependency
+      # (@supabase/supabase-js) needs installing, not the whole Next.js
+      # app's devDependencies - keeps this job quick.
+      - run: pnpm install --frozen-lockfile --prod
+      - name: Reset and reseed demo data
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.DEMO_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEMO_SUPABASE_SERVICE_ROLE_KEY }}
+          DEMO_SUPERUSER_EMAIL: ${{ secrets.DEMO_SUPERUSER_EMAIL }}
+        run: node scripts/seed-demo.mjs --reset

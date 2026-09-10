@@ -5,12 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 
 const SEASONS = ["autumn", "spring", "summer"] as const;
 
-// Creates all 3 terms of an academic year in one submission — dropped the
+// Creates all 3 terms of an academic year in one submission - dropped the
 // old one-season-at-a-time form in favour of this, since a year is really
 // one unit of work, and on_default_term_created (see
 // 20260909123828_propagate_default_terms_to_schools.sql) fans each of
 // these 3 inserts out to every school anyway. Field names are
-// "<season>_start_date" etc. — see TermYearForm.
+// "<season>_start_date" etc. - see TermYearForm.
 export async function createDefaultYear(formData: FormData) {
   const rows: { name: string; start_date: string; half_term_start: string; half_term_end: string; end_date: string }[] = [];
 
@@ -30,7 +30,7 @@ export async function createDefaultYear(formData: FormData) {
     }
 
     // The display year is always start_date's own calendar year for every
-    // season — Autumn starts in the first calendar year of the academic
+    // season - Autumn starts in the first calendar year of the academic
     // year, Spring/Summer both start in its second, and in both cases
     // that's exactly the year the label should show, no offset needed.
     const label = season[0].toUpperCase() + season.slice(1);
@@ -45,7 +45,7 @@ export async function createDefaultYear(formData: FormData) {
   }
 
   const supabase = await createClient();
-  // RLS (superusers manage default terms) is the real gate here — this
+  // RLS (superusers manage default terms) is the real gate here - this
   // just no-ops quietly on failure (bad dates, duplicate names, not a
   // superuser) rather than crashing, same as updateDisplayName.
   await supabase.from("default_terms").insert(rows);
@@ -54,7 +54,7 @@ export async function createDefaultYear(formData: FormData) {
 }
 
 // Takes ids: number[] (always a single-element array here) rather than a
-// plain number, so it can be passed directly as TermDate's onDeleteTerm —
+// plain number, so it can be passed directly as TermDate's onDeleteTerm -
 // a <form action> must be an actual Server Action reference (or a .bind()
 // of one), not an inline wrapper closure calling one, which Next.js can't
 // serialize.
@@ -91,7 +91,7 @@ export async function deleteOffDay(id: number) {
 // Manual entry (addBankHoliday) stays the primary way to add one that
 // hasn't been announced on gov.uk yet (e.g. an ad-hoc holiday for a
 // monarch's death/coronation is usually confirmed before the API reflects
-// it) — this just pulls in whatever gov.uk currently has that we don't
+// it) - this just pulls in whatever gov.uk currently has that we don't
 // already have stored, filtered to today onward so refreshing doesn't
 // import years of past dates.
 export async function refreshBankHolidays() {

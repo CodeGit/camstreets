@@ -2,7 +2,7 @@
 -- volunteer to join it (via volunteer_schools) is granted school_admins
 -- for it. Chosen over a superuser manually assigning admins one-by-one, or
 -- an email-invite flow at school-creation time (which turned out to need
--- the service-role key just to learn the invited user's id back) — this
+-- the service-role key just to learn the invited user's id back) - this
 -- needs no new schema, no privileged key, and admin status can always be
 -- transferred/added to afterward via the existing school_admins RLS
 -- (an admin manages their own school's admin list).

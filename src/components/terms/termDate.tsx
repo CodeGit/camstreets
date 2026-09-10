@@ -5,9 +5,9 @@ import { deleteOffDay } from "./actions";
 
 // A "term" for display purposes: 4 dates (start, half-term start/end, end).
 // `ids` holds the underlying row id(s) to delete when this term is
-// removed — a single id for default_terms (which already has this exact
+// removed - a single id for default_terms (which already has this exact
 // shape), or two for a school's own terms (still stored as two separate
-// half-term rows under the hood — see termTimes.tsx, which pairs them into
+// half-term rows under the hood - see termTimes.tsx, which pairs them into
 // this shape for display without changing that table's schema).
 export type TermDateEntry = {
   ids: number[];
@@ -26,13 +26,13 @@ export type OffDayEntry = {
 };
 
 // Shared display for one academic year's worth of terms, reused by both
-// the superuser's default_terms editor and a school's own term times —
+// the superuser's default_terms editor and a school's own term times -
 // single source of truth for this layout rather than two components that
 // slowly diverge. `offDays` is optional: pass it (inset days + bank
 // holidays for this year) to show the collapsible list, or omit it to
 // leave that out entirely (the default_terms editor isn't school-scoped,
 // so inset days don't apply there, and bank holidays get their own
-// separate editor). `onEditTerm` is also optional — default_terms only
+// separate editor). `onEditTerm` is also optional - default_terms only
 // supports add-a-year/delete, but a school needs to adjust its
 // auto-populated dates if it diverges from the default, so termTimes.tsx
 // passes this and default_terms.tsx doesn't.

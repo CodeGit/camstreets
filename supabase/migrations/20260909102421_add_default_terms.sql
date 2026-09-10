@@ -2,7 +2,7 @@
 -- council's published term dates), used to pre-populate a school's own
 -- term when it's created, rather than an admin typing the same UK-wide
 -- dates in from scratch for every school each time. Deliberately has no
--- school_id — these are shared templates, not tied to any one school — and
+-- school_id - these are shared templates, not tied to any one school - and
 -- pre-populating doesn't lock a school in: `terms` rows are copies, so a
 -- school can still adjust its own dates afterward if it needs to diverge
 -- (different half-term, different inset days, etc).
@@ -16,7 +16,7 @@ create table public.default_terms (
 
 alter table public.default_terms enable row level security;
 
--- Not "everyone" like schools/locations/slots — this is internal admin
+-- Not "everyone" like schools/locations/slots - this is internal admin
 -- tooling (a source for pre-populating the term-creation form), not
 -- public-facing info a volunteer needs, so it's scoped to signed-in users
 -- rather than anon, closer to how school_admins is treated.

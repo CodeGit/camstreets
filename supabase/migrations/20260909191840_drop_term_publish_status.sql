@@ -1,7 +1,7 @@
 -- Terms no longer have a manually-toggled "publish" step. on_default_term_created
 -- (20260909123828_propagate_default_terms_to_schools.sql) already gives every
 -- school real, correct dates the moment a term exists, so there's no more
--- "draft, not ready yet" state to hide from the public — a term's start/end
+-- "draft, not ready yet" state to hide from the public - a term's start/end
 -- dates alone already say whether it's past, current or upcoming. Terms and
 -- their slot instances are now always publicly readable, same as
 -- volunteers/signups elsewhere in this schema, so an upcoming term (e.g. next

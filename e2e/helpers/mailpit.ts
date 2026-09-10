@@ -27,7 +27,7 @@ export async function getMagicLinkFor(email: string): Promise<string> {
   const message = await messageRes.json();
   // Reads the real href out of the rendered HTML rather than pattern-matching
   // the plain-text body, so this doesn't depend on the email template's
-  // wording (e.g. a link being parenthesised) — see supabase/templates/magic_link.html.
+  // wording (e.g. a link being parenthesised) - see supabase/templates/magic_link.html.
   const linkMatch: RegExpMatchArray | null = message.HTML.match(
     /href="([^"]+)"/
   );

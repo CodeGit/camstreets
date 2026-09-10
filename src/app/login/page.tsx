@@ -17,7 +17,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   "missing-email": "Enter your email address.",
   "send-failed": "Something went wrong sending the link. Try again.",
   "callback-failed":
-    "That sign-in link didn't work — it may have expired, already been used, or been opened in a different browser than the one you requested it from. Try signing in again.",
+    "That sign-in link didn't work - it may have expired, already been used, or been opened in a different browser than the one you requested it from. Try signing in again.",
+  "session-expired": "Your session expired - sign in again to continue.",
 };
 
 export default async function LoginPage({
@@ -33,7 +34,7 @@ export default async function LoginPage({
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            We&apos;ll email you a link to sign in — no password needed.
+            We&apos;ll email you a link to sign in - no password needed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -18,7 +18,7 @@ as $$
   );
 $$;
 
--- No longer seeds is_superuser from raw_app_meta_data — every new volunteer
+-- No longer seeds is_superuser from raw_app_meta_data - every new volunteer
 -- starts as false and gets flipped later directly on their volunteers row.
 create or replace function public.handle_new_user()
 returns trigger

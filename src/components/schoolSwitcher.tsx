@@ -102,8 +102,8 @@ export default function SchoolSwitcher({
       onValueChange={handleValueChange}
       onOpenChange={handleOpenChange}
     >
-      <Select.Trigger className="flex items-center gap-1 px-2.5 py-1 text-sm rounded-lg border border-border bg-background">
-        <Select.Value placeholder="Select your school" />
+      <Select.Trigger className="flex max-w-[55vw] items-center gap-1 overflow-hidden px-2.5 py-1 text-sm rounded-lg border border-border bg-background sm:max-w-64">
+        <Select.Value placeholder="Select your school" className="min-w-0 truncate" />
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner className="z-50" sideOffset={4}>

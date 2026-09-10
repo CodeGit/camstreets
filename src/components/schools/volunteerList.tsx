@@ -8,7 +8,7 @@ type Volunteer = Tables<"volunteers">;
 
 const ERROR_MESSAGES: Record<string, string> = {
   "last-admin":
-    "A school must always have at least one admin — remove or demote someone else first, or make another volunteer admin before removing this one.",
+    "A school must always have at least one admin - remove or demote someone else first, or make another volunteer admin before removing this one.",
 };
 
 export default async function VolunteerList({

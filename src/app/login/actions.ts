@@ -4,16 +4,7 @@
 // redirects back to /login with a status query param for the UI to show.
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-
-function getOrigin() {
-  if (process.env.VERCEL_ENV === "production") {
-    return "https://www.camstreets.org";
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
-}
+import { getOrigin } from "@/lib/origin";
 
 export async function signInWithMagicLink(formData: FormData) {
   const email = formData.get("email");

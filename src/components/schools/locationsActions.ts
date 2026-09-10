@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { deleteUnclaimedInstances } from "@/lib/slotInstances";
 
 export async function createLocation(schoolId: number, formData: FormData) {
   const name = formData.get("name");
@@ -22,13 +23,35 @@ export async function createLocation(schoolId: number, formData: FormData) {
 }
 
 // slots.location_id has no ON DELETE CASCADE, so deleting a location that
-// still has slots would otherwise fail with a foreign-key violation —
-// clean those up first rather than surface that as a confusing error.
+// still has slots would otherwise fail with a foreign-key violation -
+// clean those up first rather than surface that as a confusing error. If
+// any of those slots has a real signup, the whole delete is refused (see
+// deleteUnclaimedInstances) rather than silently orphaning a volunteer's
+// commitment.
 export async function deleteLocation(locationId: number) {
   const supabase = await createClient();
 
-  await supabase.from("slots").delete().eq("location_id", locationId);
-  await supabase.from("locations").delete().eq("id", locationId);
+  const { data: slots } = await supabase
+    .from("slots")
+    .select("id")
+    .eq("location_id", locationId);
+  const slotIds = (slots ?? []).map((s) => s.id);
+
+  const { blocked } = await deleteUnclaimedInstances(supabase, "slot_id", slotIds);
+  if (blocked) {
+    throw new Error(
+      "Can't delete this location: a volunteer has signed up (even if since cancelled) for one of its slots."
+    );
+  }
+
+  const { error: slotsError } = await supabase.from("slots").delete().eq("location_id", locationId);
+  if (slotsError) {
+    throw new Error(`Failed to delete this location's slots: ${slotsError.message}`);
+  }
+  const { error: locationError } = await supabase.from("locations").delete().eq("id", locationId);
+  if (locationError) {
+    throw new Error(`Failed to delete this location: ${locationError.message}`);
+  }
 
   revalidatePath("/dashboard");
 }
@@ -37,7 +60,7 @@ export async function deleteLocation(locationId: number) {
 // JS Date#getDay()). School streets run on school days, and a slot's
 // weekday-to-weekday times are almost always identical, so a "slot" here
 // means one row per weekday rather than asking the admin to pick a single
-// day — same idea as terms being stored as 2 half-term rows but shown as
+// day - same idea as terms being stored as 2 half-term rows but shown as
 // one 4-date term.
 const WEEKDAYS = [1, 2, 3, 4, 5];
 
@@ -72,12 +95,23 @@ export async function createSlot(locationId: number, formData: FormData) {
 }
 
 // Deletes every underlying weekday row for one displayed slot (see
-// createSlot above — a displayed slot is always up to 5 rows, one per
-// weekday).
+// createSlot above - a displayed slot is always up to 5 rows, one per
+// weekday). Refused if any of its generated dates has a real signup - see
+// deleteUnclaimedInstances.
 export async function deleteSlot(slotIds: number[]) {
   const supabase = await createClient();
 
-  await supabase.from("slots").delete().in("id", slotIds);
+  const { blocked } = await deleteUnclaimedInstances(supabase, "slot_id", slotIds);
+  if (blocked) {
+    throw new Error(
+      "Can't delete this slot: a volunteer has signed up (even if since cancelled) for one of its dates."
+    );
+  }
+
+  const { error } = await supabase.from("slots").delete().in("id", slotIds);
+  if (error) {
+    throw new Error(`Failed to delete this slot: ${error.message}`);
+  }
 
   revalidatePath("/dashboard");
 }

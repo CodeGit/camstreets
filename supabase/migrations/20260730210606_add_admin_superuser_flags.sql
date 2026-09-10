@@ -1,6 +1,6 @@
 -- Stored, denormalized copies of admin/superuser status on volunteers, for
 -- cheap display purposes (e.g. the navbar showing role). The dynamic checks
--- (is_superuser(), is_school_admin()) remain the source of truth for RLS —
+-- (is_superuser(), is_school_admin()) remain the source of truth for RLS -
 -- this migration doesn't touch authorization, only adds a synced copy.
 alter table public.volunteers
   add column is_admin boolean not null default false,
@@ -8,7 +8,7 @@ alter table public.volunteers
 
 -- Without this, RLS's "volunteers can create/update their own profile"
 -- policies (with check (auth.uid() = id)) restrict *which row*, not *which
--- columns*, a volunteer can write — combined with the table-wide grants in
+-- columns*, a volunteer can write - combined with the table-wide grants in
 -- grant_table_privileges.sql, that would let any volunteer set their own
 -- is_admin/is_superuser to true. Column-level grants close that off:
 -- authenticated users can only ever touch display_name themselves;
@@ -19,7 +19,7 @@ revoke insert, update on public.volunteers from authenticated;
 grant insert (id, display_name) on public.volunteers to authenticated;
 grant update (display_name) on public.volunteers to authenticated;
 
--- Superusers now get a volunteers row too (previously excluded) — in
+-- Superusers now get a volunteers row too (previously excluded) - in
 -- practice a superuser is likely also a parent who wants to claim slots
 -- like any other volunteer, so they need a volunteers row for
 -- signups.volunteer_id to reference. The flag now lives on the row instead

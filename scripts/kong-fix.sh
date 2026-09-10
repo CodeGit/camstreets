@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Restarts Kong (the local Supabase stack's API gateway) and waits until
-# it's actually proxying to auth correctly again — not just until Docker
+# it's actually proxying to auth correctly again - not just until Docker
 # reports the container "healthy", which has been observed to say healthy
 # while still returning 502s.
 #
 # Needed because `supabase start`/`stop`/`db reset` restart the auth
-# container, and Kong doesn't always reconnect to it on its own —
+# container, and Kong doesn't always reconnect to it on its own -
 # symptom is every login attempt failing with a 502 Bad Gateway
 # ("An invalid response was received from the upstream server"). See
 # setup.md's "Known quirk" note. Safe to run even when Kong is already
-# fine — exits immediately in that case.
+# fine - exits immediately in that case.
 set -euo pipefail
 
 ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
@@ -28,13 +28,13 @@ if [ "$(check_kong)" = "200" ]; then
 fi
 
 if ! docker ps -a --format '{{.Names}}' | grep -q '^supabase_kong_camstreets$'; then
-  echo "supabase_kong_camstreets doesn't exist — is the local stack set up? (pnpm exec supabase status)"
+  echo "supabase_kong_camstreets doesn't exist - is the local stack set up? (pnpm exec supabase status)"
   exit 1
 fi
 
 # `docker restart` works whether the container is currently running,
-# stopped, or unhealthy — no need to branch on its current state first.
-echo "Kong isn't proxying to auth correctly — restarting it..."
+# stopped, or unhealthy - no need to branch on its current state first.
+echo "Kong isn't proxying to auth correctly - restarting it..."
 docker restart supabase_kong_camstreets > /dev/null
 
 for _ in $(seq 1 15); do
@@ -45,5 +45,5 @@ for _ in $(seq 1 15); do
   fi
 done
 
-echo "Kong still isn't responding correctly after a restart — something else may be wrong."
+echo "Kong still isn't responding correctly after a restart - something else may be wrong."
 exit 1

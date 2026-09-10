@@ -172,6 +172,7 @@ export type Database = {
           active: boolean
           created_at: string
           id: number
+          is_demo: boolean
           name: string
           street: string | null
           town: string | null
@@ -180,6 +181,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: never
+          is_demo?: boolean
           name: string
           street?: string | null
           town?: string | null
@@ -188,6 +190,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: never
+          is_demo?: boolean
           name?: string
           street?: string | null
           town?: string | null
@@ -363,6 +366,35 @@ export type Database = {
           },
         ]
       }
+      volunteer_calendar_feeds: {
+        Row: {
+          created_at: string
+          last_fetched_at: string | null
+          token: string
+          volunteer_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_fetched_at?: string | null
+          token?: string
+          volunteer_id: string
+        }
+        Update: {
+          created_at?: string
+          last_fetched_at?: string | null
+          token?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_calendar_feeds_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: true
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_schools: {
         Row: {
           created_at: string
@@ -436,6 +468,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_slot_instances_for_school_term: {
+        Args: { p_school_id: number; p_term_id: number }
+        Returns: undefined
+      }
       is_school_admin: { Args: { p_school_id: number }; Returns: boolean }
       is_superuser: { Args: never; Returns: boolean }
     }

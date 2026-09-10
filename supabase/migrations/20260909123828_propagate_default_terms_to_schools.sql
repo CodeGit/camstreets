@@ -1,4 +1,4 @@
--- Schools no longer create their own terms manually — they're populated
+-- Schools no longer create their own terms manually - they're populated
 -- automatically from default_terms, with the school able to edit the
 -- resulting dates afterward if they need to diverge. Two directions:
 --   1. A new default_terms year is added -> back-fill it onto every

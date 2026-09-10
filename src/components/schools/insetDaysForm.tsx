@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 
 const INITIAL_ROWS = 5;
 
-// Compact, table-style entry for inset days — a "#"/Date/Notes row per
+// Compact, table-style entry for inset days - a "#"/Date/Notes row per
 // slot, with an "Add row" button for schools that need more than the
 // initial 5. Row-adding needs client state, so this piece (only this
 // piece) is a client component; the actual submit still goes straight to

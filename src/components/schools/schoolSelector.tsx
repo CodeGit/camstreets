@@ -1,24 +1,30 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Select } from "@base-ui/react/select";
 
 type School = { id: number; name: string };
 
-// Compact inline selector for the admin dashboard's "Your schools" header —
-// unlike schoolSwitcher.tsx (navbar-wide, fetches its own school list client
-// side, navigates to a school's public page), this takes the already
-// server-fetched schools as a prop and navigates via the ?school= query
-// param the dashboard reads. Reuses the same base-ui Select primitive/styling
-// as schoolSwitcher.tsx for visual consistency without duplicating the fetch.
+// Compact inline selector for a dashboard's school-scoped tabs - unlike
+// schoolSwitcher.tsx (navbar-wide, fetches its own school list client side,
+// navigates to a school's public page), this takes the already
+// server-fetched schools as a prop and navigates via a query param the
+// dashboard reads. `paramName` lets two independent selectors coexist on the
+// same page (e.g. the admin's own "Your schools" management pick and "My
+// calendar"'s pick) - selecting one merges into the existing query string
+// rather than replacing it, so it doesn't clobber the other's selection.
 export default function SchoolSelector({
   schools,
   selectedSchoolId,
+  paramName = "school",
 }: {
   schools: School[];
   selectedSchoolId: number;
+  paramName?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const options = schools.map((school) => ({ label: school.name, value: school.id }));
 
@@ -27,7 +33,10 @@ export default function SchoolSelector({
       items={options}
       value={selectedSchoolId}
       onValueChange={(schoolId: number | null) => {
-        if (schoolId !== null) router.push(`/dashboard?school=${schoolId}`);
+        if (schoolId === null) return;
+        const params = new URLSearchParams(searchParams.toString());
+        params.set(paramName, String(schoolId));
+        router.push(`${pathname}?${params.toString()}`);
       }}
     >
       <Select.Trigger className="flex items-center gap-1 px-2.5 py-1 text-sm rounded-lg border border-border bg-background">

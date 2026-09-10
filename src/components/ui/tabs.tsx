@@ -2,7 +2,7 @@
 
 // Thin styled wrapper around @base-ui/react/tabs. Kept as a client
 // component (tab switching is interactive), but its panel contents can
-// still be async Server Components passed in as children — Next.js
+// still be async Server Components passed in as children - Next.js
 // renders those server-side once and hands the result down as children,
 // same as any other server-in-client composition.
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";

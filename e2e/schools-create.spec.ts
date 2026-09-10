@@ -8,7 +8,7 @@ import { signInAs } from "./helpers/auth";
 test.describe.configure({ mode: "serial" });
 
 // auth.email.max_frequency in supabase/config.toml rate-limits OTP sends to
-// the same address to 1/second — these tests reuse the same seeded
+// the same address to 1/second - these tests reuse the same seeded
 // accounts back-to-back, so without this gap a request can arrive within
 // that window and silently get rate-limited.
 test.beforeEach(async () => {
@@ -16,7 +16,7 @@ test.beforeEach(async () => {
 });
 
 // Bypasses the form's native HTML5 "required" validation on `name`, so we
-// can exercise the server action's own missing-name handling — same idea as
+// can exercise the server action's own missing-name handling - same idea as
 // e2e/login.spec.ts, but scoped to the create-school form specifically:
 // this page (unlike /login) renders the navbar, whose own sign-out
 // <form> comes first in the DOM, so a bare `document.querySelector("form")`

@@ -3,18 +3,18 @@ import { createClient } from "@supabase/supabase-js";
 import { signInAs } from "./helpers/auth";
 
 // Seeded fixtures (supabase/seed.sql): Newnham Croft Primary (id 1) has
-// *three* admins out of the box — alex.admin@example.com (directly seeded,
+// *three* admins out of the box - alex.admin@example.com (directly seeded,
 // original core fixture), Vera (auto-promoted to admin as the first
 // volunteer_schools joiner), and admin@example.com (directly seeded,
 // added later for role-based login testing). Only alex.admin and
-// admin@example.com are admin-but-not-volunteer there — Vera is both.
+// admin@example.com are admin-but-not-volunteer there - Vera is both.
 const SCHOOL_ID = 1;
 const OTHER_ADMIN_IDS = [
   "a0000000-0000-0000-0000-000000000002", // alex.admin@example.com
   "a0000000-0000-0000-0000-000000000004", // admin@example.com
 ];
 
-// Bypasses RLS to arrange fixture state directly — there's no UI yet for
+// Bypasses RLS to arrange fixture state directly - there's no UI yet for
 // reducing a school down to a single admin (joining/leaving a school isn't
 // built), so this is the only way to get a school into that state for the
 // last-admin tests below. The key is the fixed local-stack default,
@@ -27,7 +27,7 @@ const serviceClient = createClient(
 test.describe.configure({ mode: "serial" });
 
 // auth.email.max_frequency in supabase/config.toml rate-limits OTP sends to
-// the same address to 1/second — these tests reuse the same seeded
+// the same address to 1/second - these tests reuse the same seeded
 // accounts back-to-back, so without this gap a request can arrive within
 // that window and silently get rate-limited (see schools-create.spec.ts).
 test.beforeEach(async () => {
@@ -38,14 +38,17 @@ test("admin can view volunteers, toggle a non-last admin, and remove a volunteer
   page,
 }) => {
   await signInAs(page, "admin@example.com");
-  await page.goto(`/dashboard?school=${SCHOOL_ID}`);
+  // "My calendar" is now the admin dashboard's default tab - ?tab=schools
+  // pins it to "Your schools" so the nested Volunteers/Term times/
+  // Locations tabs are actually in the DOM.
+  await page.goto(`/dashboard?school=${SCHOOL_ID}&tab=schools`);
 
   await expect(page.getByRole("heading", { name: /Volunteers/ })).toBeVisible();
   // Vera was the first to join, so the auto-promote trigger already made
   // her admin.
   await expect(page.locator("li", { hasText: "Vera" }).getByText("(admin)")).toBeVisible();
 
-  // "Volunteer" (seeded, not admin here) — promote then demote
+  // "Volunteer" (seeded, not admin here) - promote then demote
   const volunteerRow = page.locator("li", { hasText: "Volunteer" });
   await volunteerRow.getByRole("button", { name: "Make admin" }).click();
   await expect(page.locator("li", { hasText: "Volunteer" }).getByText("(admin)")).toBeVisible();
@@ -95,7 +98,10 @@ test.describe("last-admin guard", () => {
 
   test("blocks demoting the sole admin", async ({ page }) => {
     await signInAs(page, "superuser@example.com");
-    await page.goto(`/dashboard?school=${SCHOOL_ID}`);
+    // "My calendar" is now the superuser dashboard's default tab -
+    // tab=schools pins it to "Schools" so the nested Volunteers tab is in
+    // the DOM.
+    await page.goto(`/dashboard?school=${SCHOOL_ID}&tab=schools`);
 
     const veraRow = page.locator("li", { hasText: "Vera" });
     await expect(veraRow.getByText("(admin)")).toBeVisible();
@@ -110,7 +116,10 @@ test.describe("last-admin guard", () => {
 
   test("blocks removing the sole admin from the school", async ({ page }) => {
     await signInAs(page, "superuser@example.com");
-    await page.goto(`/dashboard?school=${SCHOOL_ID}`);
+    // "My calendar" is now the superuser dashboard's default tab -
+    // tab=schools pins it to "Schools" so the nested Volunteers tab is in
+    // the DOM.
+    await page.goto(`/dashboard?school=${SCHOOL_ID}&tab=schools`);
 
     await page
       .locator("li", { hasText: "Vera" })

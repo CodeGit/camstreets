@@ -1,8 +1,8 @@
 -- Consistency: school_admins was the odd one out, calling its member column
 -- user_id while signups/volunteer_schools both call theirs volunteer_id.
--- Renaming it also repoints the FK from auth.users to public.volunteers —
+-- Renaming it also repoints the FK from auth.users to public.volunteers -
 -- safe, since handle_new_user() already gives every auth.users row a
--- volunteers row — so it matches signups.volunteer_id and
+-- volunteers row - so it matches signups.volunteer_id and
 -- volunteer_schools.volunteer_id in both name and target.
 alter table public.school_admins rename column user_id to volunteer_id;
 

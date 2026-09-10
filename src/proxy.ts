@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // getClaims() (not getUser()) is Supabase's current recommendation here —
+  // getClaims() (not getUser()) is Supabase's current recommendation here -
   // it's what actually triggers the refresh-token exchange when the access
   // token has expired, writing the renewed session back via setAll above.
   await supabase.auth.getClaims();

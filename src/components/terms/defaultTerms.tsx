@@ -6,11 +6,11 @@ import TermYearForm from "./termYearForm";
 
 // Superuser-managed default term dates, used to pre-populate a school's
 // own terms rather than an admin typing the same UK-wide dates in from
-// scratch each time — see
+// scratch each time - see
 // supabase/migrations/20260909102421_add_default_terms.sql. Not
 // school-scoped: these are shared templates. No inset-days/bank-holidays
 // collapsible here (that's TermDate's optional `offDays` prop, left
-// unset) — inset days are school-specific and bank holidays get their own
+// unset) - inset days are school-specific and bank holidays get their own
 // editor below.
 export default async function DefaultTerms() {
   const supabase = await createClient();
@@ -30,7 +30,7 @@ export default async function DefaultTerms() {
     .select("*")
     .order("start_date");
 
-  // Academic year is derived from each term's own start_date, not stored —
+  // Academic year is derived from each term's own start_date, not stored -
   // Autumn starts in the year the academic year is named after (2026/2027
   // starts with Autumn 2026), Spring/Summer start in the following
   // calendar year, so a start month before August means it belongs to the

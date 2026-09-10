@@ -40,7 +40,7 @@ export default async function EditSchoolPage({
     .maybeSingle();
 
   // Unlike creation (superuser-only), editing is also open to admins of
-  // this specific school — matches the schools table's RLS update policy.
+  // this specific school - matches the schools table's RLS update policy.
   const { data: adminOfSchool } = await supabase
     .from("school_admins")
     .select("school_id")

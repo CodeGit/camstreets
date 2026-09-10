@@ -19,12 +19,12 @@ insert into public.school_admins (school_id, volunteer_id) values
 
 -- on_default_term_created (20260909123828) also auto-creates terms for
 -- School A/B from seed.sql's default_terms rows the moment they're
--- inserted above — the queries below filter by name to isolate this
+-- inserted above - the queries below filter by name to isolate this
 -- fixture row from that automatic set rather than assert on both.
 insert into public.terms (school_id, name, start_date, end_date) values
   ((select id from public.schools where name = 'School A'), 'RLS Test Term', '2026-09-01', '2026-10-23');
 
--- Test 1: terms are publicly readable regardless of which school owns them —
+-- Test 1: terms are publicly readable regardless of which school owns them -
 -- a term's dates alone say whether it's past/current/upcoming, there's no
 -- more "not ready to show yet" state to gate (20260909191840).
 set local role anon;

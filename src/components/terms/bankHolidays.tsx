@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { addBankHoliday, deleteOffDay, refreshBankHolidays } from "./actions";
 
 // Superuser-managed bank holidays (off_days.type = 'bank_holiday',
-// school_id null — see supabase/migrations/20260909102854_add_off_days.sql).
+// school_id null - see supabase/migrations/20260909102854_add_off_days.sql).
 // Two ways to add one: "Refresh from gov.uk" pulls in anything new from
 // the published dataset, or add one manually for a not-yet-announced,
 // ad-hoc holiday (e.g. a monarch's death/coronation) that gov.uk hasn't

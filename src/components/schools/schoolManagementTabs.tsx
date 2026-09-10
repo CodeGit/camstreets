@@ -3,7 +3,7 @@ import VolunteerList from "./volunteerList";
 import TermTimes from "./termTimes";
 import LocationsAndSlots from "./locationsAndSlots";
 
-// Shared by the admin and superuser dashboards — a superuser needs the same
+// Shared by the admin and superuser dashboards - a superuser needs the same
 // per-school controls (e.g. adding inset days on a less technical admin's
 // behalf) an admin has, not a separate cut-down view. RLS already allows a
 // superuser to write to any school's terms/off_days/locations, so this is

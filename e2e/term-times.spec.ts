@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { signInAs } from "./helpers/auth";
 
 // Fixed local-stack default service-role key (printed by `supabase
-// start`), used to verify state with no UI path — never valid against a
+// start`), used to verify state with no UI path - never valid against a
 // hosted project. Same pattern as volunteer-list.spec.ts.
 const serviceClient = createClient(
   "http://127.0.0.1:54321",
@@ -19,7 +19,7 @@ test("superuser can add a whole academic year of default terms in one submission
   await page.goto("/dashboard");
   await page.getByRole("tab", { name: "Default school year" }).click();
 
-  // no per-term/per-season add form — just "Add a year"
+  // no per-term/per-season add form - just "Add a year"
   await expect(page.getByText("Add a year")).toBeVisible();
   await expect(page.getByLabel("Season", { exact: true })).toHaveCount(0);
 
@@ -59,8 +59,8 @@ test("superuser can add a whole academic year of default terms in one submission
   }
 
   // Deleting default_terms rows doesn't cascade-delete the terms rows
-  // they already propagated to existing schools (by design — see the
-  // "already-created school terms shouldn't be affected" discussion) —
+  // they already propagated to existing schools (by design - see the
+  // "already-created school terms shouldn't be affected" discussion) -
   // clean those up directly so later tests only see the seeded 2026/2027
   // year for Newnham Croft, not a leftover 2027/2028 too.
   await serviceClient
@@ -80,8 +80,11 @@ test("a school's terms are auto-populated from default_terms and editable in pla
   page,
 }) => {
   await signInAs(page, "admin@example.com");
-  await page.goto("/dashboard");
-  // The admin's only school (Newnham Croft Primary) is auto-selected.
+  // admin@ now administers two schools (Newnham Croft + Meadowside, seed.sql)
+  // - ?school=1 pins this to Newnham Croft explicitly.
+  // "My calendar" is now the admin dashboard's default tab - tab=schools
+  // pins it to "Your schools" so the nested Term times tab is in the DOM.
+  await page.goto("/dashboard?school=1&tab=schools");
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // populated automatically (on_default_term_created), not by a form
@@ -94,7 +97,7 @@ test("a school's terms are auto-populated from default_terms and editable in pla
 
   // edit a term's dates in place
   // <details> resets closed on every server-action revalidation, so open
-  // it directly via evaluate() rather than clicking "Edit dates" — a click
+  // it directly via evaluate() rather than clicking "Edit dates" - a click
   // can race the re-render and land on an about-to-be-replaced element.
   async function openEditDetails(rowText: string) {
     const row = page.locator("li", { hasText: rowText });
@@ -122,7 +125,7 @@ test("a school's terms are auto-populated from default_terms and editable in pla
 });
 
 // A brand-new school has no admin yet (creating one doesn't auto-grant
-// admin rights — see TODO.md §4), and the superuser dashboard has no
+// admin rights - see TODO.md §4), and the superuser dashboard has no
 // per-school "Term times" tab (that's admin-dashboard-only), so there's no
 // UI path to check this for an unclaimed school. Verifying directly
 // against the database instead, same pattern as volunteer-list.spec.ts.
@@ -162,13 +165,16 @@ test("a new school is automatically backfilled with terms from existing default 
 
 test("bank holidays outside term time are filtered out of the collapsible", async ({ page }) => {
   await signInAs(page, "admin@example.com");
-  await page.goto("/dashboard");
-  // The admin's only school (Newnham Croft Primary) is auto-selected.
+  // admin@ now administers two schools (Newnham Croft + Meadowside, seed.sql)
+  // - ?school=1 pins this to Newnham Croft explicitly.
+  // "My calendar" is now the admin dashboard's default tab - tab=schools
+  // pins it to "Your schools" so the nested Term times tab is in the DOM.
+  await page.goto("/dashboard?school=1&tab=schools");
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // Christmas Day / Boxing Day / New Year's Day fall in the Christmas
-  // holiday, outside any term's teaching days — filtered out. Good Friday
-  // falls inside Spring's teaching days (before its half term) — shown.
+  // holiday, outside any term's teaching days - filtered out. Good Friday
+  // falls inside Spring's teaching days (before its half term) - shown.
   const details2026 = page.locator("details", { has: page.getByText(/Inset days/) }).first();
   await details2026.evaluate((el) => {
     (el as HTMLDetailsElement).open = true;
@@ -183,12 +189,15 @@ test("inset days table is compact with numbered rows, scoped per academic year, 
   page,
 }) => {
   await signInAs(page, "admin@example.com");
-  await page.goto("/dashboard");
-  // The admin's only school (Newnham Croft Primary) is auto-selected.
+  // admin@ now administers two schools (Newnham Croft + Meadowside, seed.sql)
+  // - ?school=1 pins this to Newnham Croft explicitly.
+  // "My calendar" is now the admin dashboard's default tab - tab=schools
+  // pins it to "Your schools" so the nested Term times tab is in the DOM.
+  await page.goto("/dashboard?school=1&tab=schools");
   await page.getByRole("tab", { name: "Term times" }).click();
 
   // each academic year gets its own "Add inset days" section, not one
-  // shared form — scope everything to the 2026/2027 one specifically
+  // shared form - scope everything to the 2026/2027 one specifically
   await expect(page.getByText("Add inset days for 2026/2027")).toBeVisible();
   const section2026 = page
     .locator("div", { has: page.getByText("Add inset days for 2026/2027") })
@@ -199,7 +208,7 @@ test("inset days table is compact with numbered rows, scoped per academic year, 
   await expect(section2026.getByRole("columnheader", { name: "Notes" })).toBeVisible();
   await expect(section2026.locator("tbody tr")).toHaveCount(5);
 
-  // "Add row" is client-side — no page reload, no server round trip
+  // "Add row" is client-side - no page reload, no server round trip
   await section2026.getByRole("button", { name: "Add row" }).click();
   await expect(section2026.locator("tbody tr")).toHaveCount(6);
 

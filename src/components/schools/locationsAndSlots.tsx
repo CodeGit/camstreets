@@ -8,7 +8,7 @@ type Slot = { id: number; label: string; start_time: string; end_time: string; c
 
 // A "slot" is stored as one row per weekday (createSlot always creates
 // Monday..Friday together), grouped back into a single displayed row here
-// by (label, start_time, end_time, capacity) — same idea as terms being
+// by (label, start_time, end_time, capacity) - same idea as terms being
 // two half-term rows shown as one 4-date term.
 function groupSlots(slots: Slot[]): { ids: number[]; label: string; start_time: string; end_time: string; capacity: number }[] {
   const groups = new Map<string, { ids: number[]; label: string; start_time: string; end_time: string; capacity: number }>();
@@ -45,8 +45,8 @@ export default async function LocationsAndSlots({ schoolId }: { schoolId: number
         <h3 className="text-sm font-medium">Locations</h3>
         <p className="text-sm text-muted-foreground">
           Each location has its own weekly slots (e.g. Morning drop-off,
-          Afternoon pickup — every weekday, same time) with a minimum
-          occupancy — how many volunteers this slot needs.
+          Afternoon pickup - every weekday, same time) with a minimum
+          occupancy - how many volunteers this slot needs.
         </p>
       </div>
 

@@ -3,7 +3,7 @@ import { getMagicLinkFor } from "./helpers/mailpit";
 
 // Bypasses the login form's native HTML5 validation (required/type="email"),
 // which would otherwise block submitting empty or malformed values before
-// they ever reach the server — needed to exercise our own server-side
+// they ever reach the server - needed to exercise our own server-side
 // error handling for those same cases.
 async function disableClientValidation(page: Page) {
   await page.evaluate(() => {

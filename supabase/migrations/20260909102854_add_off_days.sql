@@ -5,7 +5,7 @@
 --   - bank_holiday: applies to every school (school_id null)
 --   - inset_day: a specific school's own staff-training day (school_id set)
 -- Explicit `type` rather than relying on school_id's nullness alone to
--- convey which — makes the distinction self-documenting, and the check
+-- convey which - makes the distinction self-documenting, and the check
 -- constraint below turns "bank holidays are global, inset days aren't"
 -- from a convention into an enforced invariant.
 create table public.off_days (
@@ -26,7 +26,7 @@ alter table public.off_days enable row level security;
 -- Same visibility rationale as default_terms: internal admin-tooling input
 -- to term publishing, not public-facing itself (the public sees the
 -- resulting cancelled slot_instances once a term is published, not this
--- table directly) — scoped to signed-in users, not anon.
+-- table directly) - scoped to signed-in users, not anon.
 grant select, insert, update, delete on public.off_days to authenticated, service_role;
 
 create policy "signed-in users can view off days"
@@ -38,7 +38,7 @@ using (true);
 -- is_school_admin(null) is always false (no school_admins row can match a
 -- null school_id), so this naturally restricts bank_holiday rows
 -- (school_id null) to superusers only, while letting a school's own admin
--- manage that school's inset_day rows — same is_school_admin(...) or
+-- manage that school's inset_day rows - same is_school_admin(...) or
 -- is_superuser() pattern already used for terms/locations/slots.
 create policy "school admins and superusers manage off days"
 on public.off_days

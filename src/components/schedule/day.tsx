@@ -1,16 +1,7 @@
-import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import type { Tables } from "@/lib/supabase/database.types";
+import InstanceCard, { type ScheduleInstance } from "./instanceCard";
+import CalendarNav from "./calendarNav";
 
-export type ScheduleInstance = Tables<"slot_instances"> & {
-  slot: Tables<"slots"> & {
-    location: Tables<"locations">;
-  };
-  signups: (Tables<"signups"> & {
-    volunteer: Tables<"volunteers">;
-  })[];
-};
+export type { ScheduleInstance };
 
 // Date-only strings need a fixed UTC time when parsed, otherwise
 // `new Date("2026-09-07")` and the viewer's local timezone can disagree
@@ -35,31 +26,39 @@ export default function DaySchedule({
   date,
   hasTerm,
   instances,
+  schoolId,
+  schoolName,
+  currentVolunteerId,
+  isSchoolMember,
+  regularSlotIds,
+  extraParams,
 }: {
   date: string;
   hasTerm: boolean;
   instances: ScheduleInstance[];
+  schoolId: number;
+  schoolName: string;
+  currentVolunteerId: string | null;
+  isSchoolMember: boolean;
+  regularSlotIds: Set<number>;
+  // Other query params (e.g. which view/school a caller has selected) that
+  // the prev/next day links need to preserve - see week.tsx's own
+  // extraParams comment for the same gap this closes.
+  extraParams?: Record<string, string>;
 }) {
+  const hrefForDate = (targetDate: string) =>
+    `?${new URLSearchParams({ ...extraParams, date: targetDate }).toString()}`;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">{formatLong(date)}</h2>
-        <div className="flex gap-2">
-          <Link
-            href={`?date=${shiftDate(date, -1)}`}
-            className={buttonVariants({ variant: "outline", size: "icon" })}
-            aria-label="Previous day"
-          >
-            <ChevronLeft />
-          </Link>
-          <Link
-            href={`?date=${shiftDate(date, 1)}`}
-            className={buttonVariants({ variant: "outline", size: "icon" })}
-            aria-label="Next day"
-          >
-            <ChevronRight />
-          </Link>
-        </div>
+        <CalendarNav
+          prevHref={hrefForDate(shiftDate(date, -1))}
+          nextHref={hrefForDate(shiftDate(date, 1))}
+          prevLabel="Previous day"
+          nextLabel="Next day"
+        />
       </div>
 
       {!hasTerm && (
@@ -73,71 +72,17 @@ export default function DaySchedule({
       )}
 
       <div className="space-y-3">
-        {instances.map((instance) => {
-          const confirmed = instance.signups.filter((s) => s.status === "confirmed");
-          const status =
-            confirmed.length >= instance.capacity
-              ? "staffed"
-              : confirmed.length > 0
-                ? "partial"
-                : "open";
-          const statusLabel =
-            status === "staffed"
-              ? "Fully staffed"
-              : status === "partial"
-                ? "Needs more volunteers"
-                : "Needs volunteers";
-
-          return (
-            <div
-              key={instance.id}
-              className="flex items-center justify-between rounded-lg border border-border p-4"
-            >
-              <div>
-                <div className="font-medium">{instance.slot.location.name}</div>
-                <div className="text-sm text-muted-foreground">
-                  {instance.slot.label} · {instance.start_time.slice(0, 5)}–
-                  {instance.end_time.slice(0, 5)}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    status === "staffed"
-                      ? "bg-staffed-bg text-staffed"
-                      : status === "partial"
-                        ? "bg-partial-bg text-partial"
-                        : "bg-open-bg text-open"
-                  }`}
-                >
-                  {statusLabel}
-                </span>
-                <div className="flex gap-1">
-                  {Array.from({ length: instance.capacity }).map((_, i) => {
-                    const signup = confirmed[i];
-                    return signup ? (
-                      <span
-                        key={i}
-                        title={signup.volunteer.display_name}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-staffed-bg text-xs font-semibold text-staffed"
-                      >
-                        {signup.volunteer.display_name[0]}
-                      </span>
-                    ) : (
-                      <span
-                        key={i}
-                        title="Needs a volunteer"
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground"
-                      >
-                        +
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {instances.map((instance) => (
+          <InstanceCard
+            key={instance.id}
+            instance={instance}
+            schoolId={schoolId}
+            schoolName={schoolName}
+            currentVolunteerId={currentVolunteerId}
+            isSchoolMember={isSchoolMember}
+            isRegularCommitment={regularSlotIds.has(instance.slot_id)}
+          />
+        ))}
       </div>
     </div>
   );

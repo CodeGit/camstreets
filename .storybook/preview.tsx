@@ -3,7 +3,7 @@ import type { Preview } from '@storybook/nextjs-vite'
 
 const preview: Preview = {
   parameters: {
-    // This project is entirely App Router — without this, Storybook's
+    // This project is entirely App Router - without this, Storybook's
     // Next.js integration defaults to mocking the old Pages Router, which
     // never provides the AppRouterContext that next/navigation's useRouter()
     // needs, causing "invariant expected app router to be mounted".

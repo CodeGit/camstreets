@@ -24,7 +24,7 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
   const logStatusButton: JSX.Element = volunteer ? (
     <form action={signOut}>
       <Button type="submit">
-        Log out {volunteer.display_name}
+        Log out <span className="hidden sm:inline">{volunteer.display_name}</span>
         <LogOut data-icon="inline-end" />
       </Button>
     </form>
@@ -42,9 +42,9 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
   ) : <></>;
 
   return (
-    <nav className="flex items-center justify-between px-4 py-2 bg-gray-100 text-black">
-      <div className="flex items-center gap-2">
-        <span>Cambridge School Streets</span>
+    <nav className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-gray-100 text-black">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="shrink-0 whitespace-nowrap font-medium">Cambridge School Streets</span>
         <SchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
       </div>
       <div className="flex items-center gap-2">

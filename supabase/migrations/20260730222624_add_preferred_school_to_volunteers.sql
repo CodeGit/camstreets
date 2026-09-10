@@ -1,4 +1,4 @@
--- Purely a UX default (e.g. pre-selecting a school in the calendar view) —
+-- Purely a UX default (e.g. pre-selecting a school in the calendar view) -
 -- no enforcement, unrelated to signups/double-booking. Self-service, same
 -- as display_name.
 alter table public.volunteers
