@@ -39,7 +39,7 @@ export default async function CalendarFeedLink() {
     return null;
   }
 
-  const url = `${getOrigin()}/calendar/${feed.token}/feed.ics`;
+  const url = `${await getOrigin()}/calendar/${feed.token}/feed.ics`;
 
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
