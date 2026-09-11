@@ -243,7 +243,11 @@ max_frequency = "1ms"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Raised to Supabase's hard maximum (24h) so a magic link stays usable even
+# if a volunteer doesn't check their email right away - minimises how often
+# a fresh link has to be requested/resent. 172800 (48h) is not accepted:
+# Supabase caps OTP expiry at 86400s as a brute-force-protection measure.
+otp_expiry = 86400
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -285,6 +289,11 @@ max_frequency = "5s"
 # 4152127777 = "123456"
 
 # Configure logged in session timeouts.
+# Left disabled deliberately: neither option is set, so sessions are
+# indefinite (silently refreshed forever until explicit logout) rather than
+# forcing periodic re-authentication - each forced re-auth would mean
+# another magic-link email, and emails are the scarce resource here (see
+# auth.rate_limit.email_sent above).
 # [auth.sessions]
 # Force log out after the specified duration.
 # timebox = "24h"
