@@ -41,6 +41,7 @@ export default function InstanceCard({
   currentVolunteerId,
   isSchoolMember,
   isRegularCommitment,
+  dimUnclaimed = false,
   variant = "card",
 }: {
   instance: ScheduleInstance;
@@ -49,6 +50,13 @@ export default function InstanceCard({
   currentVolunteerId: string | null;
   isSchoolMember: boolean;
   isRegularCommitment: boolean;
+  // Only true on the dashboard's "My calendar" week view, where the point
+  // is "what have I committed to" and everything else should visually
+  // recede. On the public school page, the same week grid shows everyone's
+  // coverage as equally relevant - there's no "mine" for a visitor to
+  // contrast against, and even a signed-in viewer browsing someone else's
+  // commitments shouldn't see them all faded.
+  dimUnclaimed?: boolean;
   // "card": full day-view card with avatar circles. "block": compact week-
   // grid cell with name badges. "agenda": a single-line row for a whole
   // term's worth of dates (termAgenda.tsx) - status/capacity only, no
@@ -205,11 +213,13 @@ export default function InstanceCard({
   // already spells everything out visually).
   const isCompact = isBlock || isAgenda || isSwatch;
   // Only dim relative to the viewer's *own* slots, and only in the week
-  // grid (isBlock) - never for an anonymous visitor (there's no "mine" to
-  // contrast against), and not in the agenda/swatch views, where a still-
+  // grid (isBlock) on the dashboard's "My calendar" view (dimUnclaimed) -
+  // never for an anonymous visitor (there's no "mine" to contrast
+  // against), never on the public school page (see the dimUnclaimed
+  // comment above), and not in the agenda/swatch views, where a still-
   // open slot is the whole point of showing it (see the variant comment
   // above) rather than something to visually recede.
-  const shouldDim = isBlock && !!currentVolunteerId && !isMine;
+  const shouldDim = isBlock && dimUnclaimed && !!currentVolunteerId && !isMine;
 
   // Base look is identical whether or not this ends up clickable; only the
   // hover/focus affordance differs (added below for signed-in viewers). A

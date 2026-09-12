@@ -60,6 +60,10 @@ export const TypicalWeek: Story = {
   },
 }
 
+// The public school page: Vera's signed in, but every slot (hers included)
+// renders at equal visual weight - a visitor browsing this school's
+// coverage cares about all of it, not just what one particular viewer has
+// claimed.
 export const SignedInVolunteer: Story = {
   args: {
     monday: MONDAY,
@@ -71,6 +75,16 @@ export const SignedInVolunteer: Story = {
     currentVolunteerId: vera.id,
     isSchoolMember: true,
     regularSlotIds: new Set(),
+  },
+}
+
+// The same week and viewer, but on the dashboard's "My calendar" tab
+// (dimUnclaimed) - Vera's own claimed slots keep their bold outline while
+// everything else fades back, so her commitments stand out at a glance.
+export const SignedInVolunteerDashboardView: Story = {
+  args: {
+    ...SignedInVolunteer.args,
+    dimUnclaimed: true,
   },
 }
 

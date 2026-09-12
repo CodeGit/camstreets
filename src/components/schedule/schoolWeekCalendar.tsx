@@ -37,11 +37,15 @@ export default async function SchoolWeekCalendar({
   schoolName,
   date,
   extraParams,
+  dimUnclaimed = false,
 }: {
   schoolId: number;
   schoolName: string;
   date?: string;
   extraParams?: Record<string, string>;
+  // See the comment on InstanceCard's own dimUnclaimed prop - the caller
+  // says which of the two contexts this shared component is in.
+  dimUnclaimed?: boolean;
 }) {
   const monday = mondayOf(date ?? toIsoDate(new Date()));
   const weekDays = Array.from({ length: 5 }, (_, i) => shiftDate(monday, i));
@@ -139,6 +143,7 @@ export default async function SchoolWeekCalendar({
       regularSlotIds={regularSlotIds}
       extraParams={extraParams}
       nameCollision={nameCollision}
+      dimUnclaimed={dimUnclaimed}
     />
   );
 }

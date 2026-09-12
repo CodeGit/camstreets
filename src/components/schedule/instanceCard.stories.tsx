@@ -48,6 +48,19 @@ export const BlockVariantAnonymous: Story = {
   args: { ...commonArgs, currentVolunteerId: null, variant: 'block' },
 }
 
+// "block", viewer is someone other than who's confirmed - on the public
+// school page (dimUnclaimed unset) this renders at full opacity, same as
+// everyone else's slots.
+export const BlockVariantOtherVolunteerPublicView: Story = {
+  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'block' },
+}
+
+// Same slot and viewer, but on the dashboard's "My calendar" tab
+// (dimUnclaimed) - since it's Vera's, not Alex's, it fades back.
+export const BlockVariantOtherVolunteerDashboardView: Story = {
+  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'block', dimUnclaimed: true },
+}
+
 // "agenda": the term view's single-line row - status/capacity only, no
 // names, so a whole term stays scannable.
 export const AgendaVariant: Story = {

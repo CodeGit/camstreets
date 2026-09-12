@@ -13,6 +13,7 @@ export default function WeekDayCell({
   currentVolunteerId,
   isSchoolMember,
   regularSlotIds,
+  dimUnclaimed = false,
 }: {
   hasTerm: boolean;
   instances: ScheduleInstance[];
@@ -22,6 +23,7 @@ export default function WeekDayCell({
   currentVolunteerId: string | null;
   isSchoolMember: boolean;
   regularSlotIds: Set<number>;
+  dimUnclaimed?: boolean;
 }) {
   if (!hasTerm) {
     return <p className="text-xs text-muted-foreground">No term covers this date.</p>;
@@ -45,6 +47,7 @@ export default function WeekDayCell({
                 currentVolunteerId={currentVolunteerId}
                 isSchoolMember={isSchoolMember}
                 isRegularCommitment={regularSlotIds.has(instance.slot_id)}
+                dimUnclaimed={dimUnclaimed}
                 variant="block"
               />
             ))}

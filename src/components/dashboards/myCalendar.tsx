@@ -90,7 +90,7 @@ export default async function MyCalendar({
       </div>
 
       {effectiveView === "day" && <SchoolDayCalendar {...calendarProps} />}
-      {effectiveView === "week" && <SchoolWeekCalendar {...calendarProps} />}
+      {effectiveView === "week" && <SchoolWeekCalendar {...calendarProps} dimUnclaimed />}
       {effectiveView === "month" && <SchoolMonthCalendar {...calendarProps} />}
       {effectiveView === "term" && <SchoolTermCalendar {...calendarProps} />}
     </div>

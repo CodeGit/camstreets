@@ -57,6 +57,7 @@ export default function WeekSchedule({
   regularSlotIds,
   extraParams,
   nameCollision,
+  dimUnclaimed = false,
 }: {
   monday: string;
   days: string[];
@@ -77,6 +78,9 @@ export default function WeekSchedule({
   // schoolWeekCalendar.tsx) - the two of them would otherwise look
   // identical on this schedule.
   nameCollision?: boolean;
+  // See the comment on InstanceCard's own dimUnclaimed prop - only ever
+  // true on the dashboard's "My calendar" week view.
+  dimUnclaimed?: boolean;
 }) {
   const friday = days[days.length - 1];
   const hrefForDate = (date: string) => `?${new URLSearchParams({ ...extraParams, date }).toString()}`;
@@ -158,6 +162,7 @@ export default function WeekSchedule({
                           currentVolunteerId={currentVolunteerId}
                           isSchoolMember={isSchoolMember}
                           regularSlotIds={regularSlotIds}
+                          dimUnclaimed={dimUnclaimed}
                         />
                       </div>
                     );
