@@ -16,7 +16,10 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: "list",
+  // In CI, also write an HTML report (never auto-opened) so a failure can
+  // be downloaded as a build artifact and inspected after the fact - the
+  // list reporter alone leaves nothing behind once the job log scrolls by.
+  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",

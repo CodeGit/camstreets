@@ -1,6 +1,8 @@
 import type { ScheduleInstance } from "./instanceCard";
 import CalendarNav from "./calendarNav";
 import WeekDayCell from "./weekDayCell";
+import WeekDayPanel from "./weekDayPanel";
+import WeekDayCarousel from "./weekDayCarousel";
 
 // Date-only strings need a fixed UTC time when parsed, otherwise
 // `new Date("2026-09-07")` and the viewer's local timezone can disagree
@@ -119,7 +121,14 @@ export default function WeekSchedule({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      {/* The 5-column grid, unchanged - just hidden below `sm`, where it no
+          longer fits and truncates every location name. See the swipeable
+          per-day carousel just below for the mobile equivalent. Plain page
+          scrolling here (no bounded pane/sticky header) - desktop scrolling
+          with a mouse/touchpad doesn't lose track of "which day" the way
+          swiping through a mobile carousel can, so it isn't worth trading
+          away simple whole-page scroll for a frozen header here. */}
+      <div className="hidden overflow-x-auto rounded-lg border border-border sm:block">
         <div className="min-w-[640px]">
           {/* Day headers, aligned with the grid columns below via a spacer
               matching the session-label column's width. */}
@@ -173,6 +182,29 @@ export default function WeekSchedule({
           })}
         </div>
       </div>
+
+      {/* Mobile: one day at a time. Touch-swipe works natively via CSS
+          scroll-snap with no JS at all; WeekDayCarousel only adds the
+          keyboard equivalent (Left/Right arrows) on top, which is why it's
+          split into its own small client component - see its own comment.
+          The 92%-width panels let the next day peek in at the edge as a
+          swipe affordance. */}
+      <WeekDayCarousel>
+        {days.map((date) => (
+          <WeekDayPanel
+            key={date}
+            date={date}
+            hasTerm={termCoversDate(date)}
+            instances={instancesByDate.get(date) ?? []}
+            schoolId={schoolId}
+            schoolName={schoolName}
+            currentVolunteerId={currentVolunteerId}
+            isSchoolMember={isSchoolMember}
+            regularSlotIds={regularSlotIds}
+            dimUnclaimed={dimUnclaimed}
+          />
+        ))}
+      </WeekDayCarousel>
     </div>
   );
 }

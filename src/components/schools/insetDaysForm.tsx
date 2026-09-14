@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Input } from "@/components/ui/input";
 
 const INITIAL_ROWS = 5;
@@ -64,9 +65,9 @@ export default function InsetDaysForm({
         >
           Add row
         </Button>
-        <Button type="submit" size="sm">
+        <SubmitButton size="sm" pendingText="Adding...">
           Add inset days
-        </Button>
+        </SubmitButton>
       </div>
     </form>
   );

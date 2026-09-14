@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { deleteOffDay } from "./actions";
@@ -68,9 +68,9 @@ export default function TermDate({
                 </div>
               </div>
               <form action={onDeleteTerm.bind(null, term.ids)}>
-                <Button type="submit" variant="destructive" size="sm">
+                <SubmitButton variant="destructive" size="sm">
                   Delete
-                </Button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -124,9 +124,7 @@ export default function TermDate({
                     />
                   </div>
                   <div className="flex items-end">
-                    <Button type="submit" size="sm">
-                      Save
-                    </Button>
+                    <SubmitButton size="sm">Save</SubmitButton>
                   </div>
                 </form>
               </details>
@@ -151,9 +149,9 @@ export default function TermDate({
                   </span>
                 </span>
                 <form action={deleteOffDay.bind(null, day.id)}>
-                  <Button type="submit" variant="destructive" size="sm">
+                  <SubmitButton variant="destructive" size="sm">
                     Delete
-                  </Button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}

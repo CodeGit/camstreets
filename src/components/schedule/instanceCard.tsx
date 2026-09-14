@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { Tables } from "@/lib/supabase/database.types";
 import { claimSlot, cancelSignup } from "./actions";
 import { volunteerBadgeClass } from "@/lib/volunteerColor";
@@ -167,15 +168,21 @@ export default function InstanceCard({
   // needing to parse several separate text nodes.
   const compactAriaLabel = `${summaryText}, ${statusLabel}`;
 
+  // A vertical stack, not a two-column split - the status pill and avatar
+  // circles used to sit on their own right-hand column alongside the
+  // location/time, which overlapped once the card got narrow enough (the
+  // mobile week-day carousel, a narrow "day" view, etc). flex-wrap on the
+  // status+avatars row means that even that combination drops to its own
+  // second line rather than overlapping if it ever runs out of room too.
   const cardContent = (
-    <>
+    <div className="min-w-0 w-full space-y-2">
       <div className="min-w-0">
         <div className="truncate font-medium">{instance.slot.location.name}</div>
         <div className="text-sm text-muted-foreground">
           {instance.start_time.slice(0, 5)}–{instance.end_time.slice(0, 5)}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBgClass} ${statusTextClass}`}>
           {statusLabel}
         </span>
@@ -202,7 +209,7 @@ export default function InstanceCard({
           })}
         </div>
       </div>
-    </>
+    </div>
   );
 
   const statusBorderClass =
@@ -246,7 +253,7 @@ export default function InstanceCard({
       ? `w-full overflow-hidden rounded-md border-l-4 text-left ${statusBgClass} ${statusBorderClass} ${
           isAgenda ? "flex items-center px-2 py-1.5" : "px-1.5 py-1"
         } ${emphasisClasses}`
-      : `flex w-full items-center justify-between rounded-lg border border-border p-4 text-left ${emphasisClasses}`;
+      : `flex w-full items-center rounded-lg border border-border p-4 text-left ${emphasisClasses}`;
   // Dimmed slots still brighten to full opacity on hover/focus so they
   // don't read as disabled - they're still clickable, just visually
   // receded until attention is on them.
@@ -255,8 +262,22 @@ export default function InstanceCard({
     : `transition-[opacity,colors] hover:opacity-100 hover:border-primary hover:bg-muted/40 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`;
   const content = isBlock ? blockContent : isAgenda ? agendaContent : isSwatch ? swatchContent : cardContent;
 
+  // Swatches truncate to a single line (start time + location only, see
+  // the variant comment above) - a hover tooltip reveals the same detail
+  // the full "card" variant already shows (status, avatars) rather than
+  // requiring a click just to see what a swatch actually is.
+  const withSwatchTooltip = (trigger: React.ReactElement) =>
+    isSwatch ? (
+      <Tooltip>
+        <TooltipTrigger render={trigger} />
+        <TooltipContent>{cardContent}</TooltipContent>
+      </Tooltip>
+    ) : (
+      trigger
+    );
+
   if (!currentVolunteerId) {
-    return (
+    return withSwatchTooltip(
       <div className={baseClasses} aria-label={isCompact ? compactAriaLabel : undefined}>
         {content}
       </div>
@@ -265,12 +286,14 @@ export default function InstanceCard({
 
   return (
     <Dialog>
-      <DialogTrigger
-        className={`${baseClasses} ${interactiveClasses}`}
-        aria-label={isCompact ? compactAriaLabel : undefined}
-      >
-        {content}
-      </DialogTrigger>
+      {withSwatchTooltip(
+        <DialogTrigger
+          className={`${baseClasses} ${interactiveClasses}`}
+          aria-label={isCompact ? compactAriaLabel : undefined}
+        >
+          {content}
+        </DialogTrigger>
+      )}
       <DialogPopup>
         {myConfirmedSignup ? (
           isRegularCommitment ? (

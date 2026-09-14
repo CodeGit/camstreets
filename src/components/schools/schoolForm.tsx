@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import SubmitButton from "../ui/submitButton";
 import { Input } from "../ui/input";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -48,9 +48,7 @@ export default function SchoolForm({
               <Input id="city" name="city" defaultValue={defaultValues?.city} />
             </div>
             
-            <Button type="submit" className="w-full">
-              {submitLabel}
-            </Button>
+            <SubmitButton className="w-full">{submitLabel}</SubmitButton>
           </form>
         </CardContent>
       </Card>

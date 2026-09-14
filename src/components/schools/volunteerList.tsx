@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Tables } from "@/lib/supabase/database.types";
 import { removeVolunteerFromSchool, setSchoolAdmin } from "@/app/dashboard/actions";
@@ -69,14 +69,14 @@ export default async function VolunteerList({
               </span>
               <div className="flex gap-2">
                 <form action={setSchoolAdmin.bind(null, schoolId, volunteer.id, !isAdminHere)}>
-                  <Button type="submit" variant="outline" size="sm">
+                  <SubmitButton variant="outline" size="sm">
                     {isAdminHere ? "Remove admin" : "Make admin"}
-                  </Button>
+                  </SubmitButton>
                 </form>
                 <form action={removeVolunteerFromSchool.bind(null, schoolId, volunteer.id)}>
-                  <Button type="submit" variant="destructive" size="sm">
+                  <SubmitButton variant="destructive" size="sm">
                     Remove
-                  </Button>
+                  </SubmitButton>
                 </form>
               </div>
             </li>

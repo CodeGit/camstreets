@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createLocation, deleteLocation, createSlot, deleteSlot } from "./locationsActions";
@@ -70,9 +70,9 @@ export default async function LocationsAndSlots({ schoolId }: { schoolId: number
                 )}
               </div>
               <form action={deleteLocation.bind(null, location.id)}>
-                <Button type="submit" variant="destructive" size="sm">
+                <SubmitButton variant="destructive" size="sm">
                   Delete location
-                </Button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -90,9 +90,9 @@ export default async function LocationsAndSlots({ schoolId }: { schoolId: number
                     </div>
                   </div>
                   <form action={deleteSlot.bind(null, slot.ids)}>
-                    <Button type="submit" variant="destructive" size="sm">
+                    <SubmitButton variant="destructive" size="sm">
                       Delete
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </li>
               ))}
@@ -138,9 +138,9 @@ export default async function LocationsAndSlots({ schoolId }: { schoolId: number
                   />
                 </div>
               </div>
-              <Button type="submit" size="sm">
+              <SubmitButton size="sm" pendingText="Adding...">
                 Add slot
-              </Button>
+              </SubmitButton>
             </form>
           </div>
         );
@@ -161,7 +161,7 @@ export default async function LocationsAndSlots({ schoolId }: { schoolId: number
             <Input id="location_address" name="address" />
           </div>
         </div>
-        <Button type="submit">Add location</Button>
+        <SubmitButton pendingText="Adding...">Add location</SubmitButton>
       </form>
     </div>
   );

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addBankHoliday, deleteOffDay, refreshBankHolidays } from "./actions";
@@ -39,9 +39,9 @@ export default async function BankHolidays() {
           </p>
         </div>
         <form action={refreshBankHolidays}>
-          <Button type="submit" variant="outline" size="sm">
+          <SubmitButton variant="outline" size="sm" pendingText="Refreshing...">
             Refresh from gov.uk
-          </Button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -56,9 +56,9 @@ export default async function BankHolidays() {
               <div className="text-sm text-muted-foreground">{holiday.date}</div>
             </div>
             <form action={deleteOffDay.bind(null, holiday.id)}>
-              <Button type="submit" variant="destructive" size="sm">
+              <SubmitButton variant="destructive" size="sm">
                 Delete
-              </Button>
+              </SubmitButton>
             </form>
           </li>
         ))}
@@ -77,7 +77,7 @@ export default async function BankHolidays() {
           <Label htmlFor="date">Date</Label>
           <Input id="date" name="date" type="date" required />
         </div>
-        <Button type="submit">Add bank holiday</Button>
+        <SubmitButton pendingText="Adding...">Add bank holiday</SubmitButton>
       </form>
     </div>
   );

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { becomeDemoAdmin } from "@/app/dashboard/actions";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 
 // dev.camstreets.org's public demo only - see becomeDemoAdmin's own
 // comment (src/app/dashboard/actions.ts) for the two independent layers
@@ -27,9 +27,9 @@ export default async function BecomeAdminButton() {
 
   return (
     <form action={becomeDemoAdmin}>
-      <Button type="submit" variant="outline" size="sm">
+      <SubmitButton variant="outline" size="sm">
         Become an admin (demo)
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrigin } from "@/lib/origin";
 import { regenerateCalendarFeedToken } from "@/app/dashboard/actions";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import CopyLinkButton from "./copyLinkButton";
 
 // A stable, per-volunteer subscribe URL for their own confirmed slots
@@ -47,9 +47,9 @@ export default async function CalendarFeedLink() {
       <code className="min-w-0 flex-1 truncate rounded bg-background px-2 py-1 text-xs">{url}</code>
       <CopyLinkButton value={url} />
       <form action={regenerateCalendarFeedToken}>
-        <Button type="submit" variant="ghost" size="sm">
+        <SubmitButton variant="ghost" size="sm" pendingText="Regenerating...">
           Regenerate link
-        </Button>
+        </SubmitButton>
       </form>
     </div>
   );

@@ -77,13 +77,12 @@ export default async function TermTimes({ schoolId }: { schoolId: number }) {
       <div className="space-y-2">
         <h3 className="text-sm font-medium">Terms</h3>
         <p className="text-sm text-muted-foreground">
-          Populated automatically from the default term dates - adjust a
-          term&apos;s dates below if this school needs to diverge.
+          These are set by the admin please feel free to alter them as needed. Inset days for your school can also be set below.
         </p>
 
         {years.length === 0 && (
           <p className="text-muted-foreground">
-            No terms yet - these appear once the superuser sets up default
+            No terms yet - these appear once the admin sets up default
             term dates for a year.
           </p>
         )}

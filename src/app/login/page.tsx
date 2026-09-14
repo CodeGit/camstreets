@@ -1,7 +1,7 @@
 // The sign-in page: an email form that triggers signInWithMagicLink, plus
 // a status message read from the ?sent / ?error query params it redirects to.
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import {
   Card,
   CardContent,
@@ -64,9 +64,9 @@ export default async function LoginPage({
                 autoComplete="email"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" pendingText="Sending...">
               Send magic link
-            </Button>
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

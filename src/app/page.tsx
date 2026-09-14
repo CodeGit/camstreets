@@ -1,7 +1,8 @@
 // Home page: shows signed-in status (with a sign-out button) or a sign-in
 // link, depending on whether a valid session exists.
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import {
   Card,
   CardContent,
@@ -33,9 +34,9 @@ export default async function Home() {
         <CardContent>
           {user ? (
             <form action={signOut}>
-              <Button type="submit" variant="outline" className="w-full">
+              <SubmitButton variant="outline" className="w-full" pendingText="Signing out...">
                 Sign out
-              </Button>
+              </SubmitButton>
             </form>
           ) : (
             <Link href="/login" className={buttonVariants({ className: "w-full" })}>

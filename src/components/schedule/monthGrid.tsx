@@ -1,6 +1,7 @@
 import CalendarNav from "./calendarNav";
 import MonthDayCell from "./monthDayCell";
 import type { ScheduleInstance } from "./instanceCard";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function shiftDate(iso: string, days: number) {
   const d = new Date(`${iso}T00:00:00Z`);
@@ -115,41 +116,46 @@ export default function MonthGrid({
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-[900px] space-y-1">
-          <div className="grid grid-cols-5 gap-1">
-            {WEEKDAY_LABELS.map((label) => (
-              <div key={label} className="text-center text-sm font-medium text-muted-foreground">
-                {label}
+      {/* Shared TooltipProvider (not one per swatch) so moving from one
+          swatch's tooltip straight to an adjacent one switches instantly
+          rather than re-running the open delay each time. */}
+      <TooltipProvider delay={200}>
+        <div className="overflow-x-auto">
+          <div className="min-w-[900px] space-y-1">
+            <div className="grid grid-cols-5 gap-1">
+              {WEEKDAY_LABELS.map((label) => (
+                <div key={label} className="text-center text-sm font-medium text-muted-foreground">
+                  {label}
+                </div>
+              ))}
+            </div>
+            {weekMondays.map((monday) => (
+              <div key={monday} className="grid grid-cols-5 gap-1">
+                {Array.from({ length: 5 }, (_, i) => shiftDate(monday, i)).map((date) => {
+                  const inCurrentMonth = date >= firstOfMonth && date <= lastOfMonth;
+                  const dayNumber = Number(date.slice(8, 10));
+                  return (
+                    <div key={date} className={inCurrentMonth ? "" : "opacity-50"}>
+                      <MonthDayCell
+                        dayNumber={dayNumber}
+                        active={termCoversDate(date)}
+                        instances={instancesByDate.get(date) ?? []}
+                        morningLocationIds={morningLocationIds}
+                        afternoonLocationIds={afternoonLocationIds}
+                        schoolId={schoolId}
+                        schoolName={schoolName}
+                        currentVolunteerId={currentVolunteerId}
+                        isSchoolMember={isSchoolMember}
+                        regularSlotIds={regularSlotIds}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
-          {weekMondays.map((monday) => (
-            <div key={monday} className="grid grid-cols-5 gap-1">
-              {Array.from({ length: 5 }, (_, i) => shiftDate(monday, i)).map((date) => {
-                const inCurrentMonth = date >= firstOfMonth && date <= lastOfMonth;
-                const dayNumber = Number(date.slice(8, 10));
-                return (
-                  <div key={date} className={inCurrentMonth ? "" : "opacity-50"}>
-                    <MonthDayCell
-                      dayNumber={dayNumber}
-                      active={termCoversDate(date)}
-                      instances={instancesByDate.get(date) ?? []}
-                      morningLocationIds={morningLocationIds}
-                      afternoonLocationIds={afternoonLocationIds}
-                      schoolId={schoolId}
-                      schoolName={schoolName}
-                      currentVolunteerId={currentVolunteerId}
-                      isSchoolMember={isSchoolMember}
-                      regularSlotIds={regularSlotIds}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          ))}
         </div>
-      </div>
+      </TooltipProvider>
     </div>
   );
 }

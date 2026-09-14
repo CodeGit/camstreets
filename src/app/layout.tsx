@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { User } from "@supabase/supabase-js";
 import type { Tables } from "@/lib/supabase/database.types";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fredoka } from "next/font/google";
 import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import "./globals.css";
 
 type Volunteer = Tables<"volunteers">;
@@ -15,6 +16,15 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Used only for the "Cambridge School Streets" wordmark in the navbar - a
+// distinct, rounded display face so it reads as a logo rather than just a
+// larger instance of the body font.
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["600"],
 });
 
 export const metadata: Metadata = {
@@ -48,11 +58,12 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fredoka.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Navbar user={user} volunteer={volunteer} />
-        {children}
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

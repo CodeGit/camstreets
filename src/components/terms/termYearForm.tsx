@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -51,7 +51,7 @@ export default function TermYearForm({
           </div>
         </div>
       ))}
-      <Button type="submit">Add year</Button>
+      <SubmitButton pendingText="Adding...">Add year</SubmitButton>
     </form>
   );
 }

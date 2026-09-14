@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { User } from '@supabase/supabase-js';
 import type { Tables } from "@/lib/supabase/database.types";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import SubmitButton from "@/components/ui/submitButton";
 import SchoolSwitcher from "@/components/schoolSwitcher";
 import { signOut } from "@/app/actions";
 
@@ -23,10 +24,10 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
 
   const logStatusButton: JSX.Element = volunteer ? (
     <form action={signOut}>
-      <Button type="submit">
+      <SubmitButton pendingText="Logging out...">
         Log out <span className="hidden sm:inline">{volunteer.display_name}</span>
         <LogOut data-icon="inline-end" />
-      </Button>
+      </SubmitButton>
     </form>
   ) : (
     <Link href="/login" className={buttonVariants({ className: "gap-1.5" })}>
@@ -42,14 +43,22 @@ function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer |
   ) : <></>;
 
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-gray-100 text-black">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="shrink-0 whitespace-nowrap font-medium">Cambridge School Streets</span>
-        <SchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
-      </div>
-      <div className="flex items-center gap-2">
+    // A single flex-wrap row, not two fixed rows - on a wide enough screen
+    // everything fits on one line (order below puts the buttons last so it
+    // reads Logo / View timetable / Buttons), and only the timetable group
+    // drops to its own full-width second line below `sm`, where the
+    // school name would otherwise truncate hard squeezed next to the logo.
+    <nav className="flex flex-wrap items-center justify-between gap-2 bg-gray-100 px-4 py-2 text-black">
+      <Link href="/" className="shrink-0 whitespace-nowrap font-logo text-xl font-semibold tracking-wide">
+        Cambridge School Streets
+      </Link>
+      <div className="flex items-center gap-2 sm:order-last">
         {dashboardLink}
         {logStatusButton}
+      </div>
+      <div className="flex w-full items-center gap-2 sm:w-auto">
+        <span className="shrink-0 text-sm font-medium text-muted-foreground">View timetable:</span>
+        <SchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
       </div>
     </nav>
   );
