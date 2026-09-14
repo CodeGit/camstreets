@@ -1,4 +1,7 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+"use client";
+
+import { useActionState, useState } from "react";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogTrigger,
@@ -8,6 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import SubmitButton from "@/components/ui/submitButton";
 import type { Tables } from "@/lib/supabase/database.types";
 import { claimSlot, cancelSignup } from "./actions";
 import { volunteerBadgeClass } from "@/lib/volunteerColor";
@@ -83,6 +87,26 @@ export default function InstanceCard({
 
   const claimAction = claimSlot.bind(null, instance.id, schoolId);
   const cancelAction = cancelSignup.bind(null, instance.id, schoolId);
+
+  // Controlled, rather than DialogClose's own click-triggered close: a
+  // DialogClose button closes the instant it's clicked, well before an
+  // async Server Action has actually finished - confirmed directly (a
+  // throttled action still showed the dialog gone in well under 300ms).
+  // On a slow connection that's a real gap with zero feedback that
+  // anything is still happening. Wrapping each action in useActionState
+  // and closing only once it resolves keeps the dialog (and its pending
+  // spinner, via SubmitButton) visible for the action's actual duration.
+  const [open, setOpen] = useState(false);
+  const [, claimFormAction] = useActionState(async (_prev: null, formData: FormData) => {
+    await claimAction(formData);
+    setOpen(false);
+    return null;
+  }, null);
+  const [, cancelFormAction] = useActionState(async (_prev: null, formData: FormData) => {
+    await cancelAction(formData);
+    setOpen(false);
+    return null;
+  }, null);
 
   // Plain-text form for aria-label (HTML tags would just be read out as
   // literal characters there). The dialog description below needs actual
@@ -285,7 +309,7 @@ export default function InstanceCard({
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       {withSwatchTooltip(
         <DialogTrigger
           className={`${baseClasses} ${interactiveClasses}`}
@@ -297,7 +321,7 @@ export default function InstanceCard({
       <DialogPopup>
         {myConfirmedSignup ? (
           isRegularCommitment ? (
-            <form action={cancelAction} className="space-y-4">
+            <form action={cancelFormAction} className="space-y-4">
               <DialogTitle>Cancel this signup?</DialogTitle>
               <DialogDescription>{summaryLines}</DialogDescription>
               <div className="space-y-2 text-sm">
@@ -314,7 +338,9 @@ export default function InstanceCard({
                 <DialogClose type="button" className={buttonVariants({ variant: "outline" })}>
                   Keep it
                 </DialogClose>
-                <DialogClose type="submit" render={<Button variant="destructive">Cancel</Button>} />
+                <SubmitButton variant="destructive" pendingText="Cancelling...">
+                  Cancel
+                </SubmitButton>
               </div>
             </form>
           ) : (
@@ -325,14 +351,16 @@ export default function InstanceCard({
                 <DialogClose type="button" className={buttonVariants({ variant: "outline" })}>
                   Keep it
                 </DialogClose>
-                <form action={cancelAction}>
-                  <DialogClose type="submit" render={<Button variant="destructive">Cancel signup</Button>} />
+                <form action={cancelFormAction}>
+                  <SubmitButton variant="destructive" pendingText="Cancelling...">
+                    Cancel signup
+                  </SubmitButton>
                 </form>
               </div>
             </>
           )
         ) : (
-          <form action={claimAction} className="space-y-4">
+          <form action={claimFormAction} className="space-y-4">
             <DialogTitle>Sign up</DialogTitle>
             <DialogDescription>{summaryLines}</DialogDescription>
             <div className="space-y-2 text-sm">
@@ -354,7 +382,7 @@ export default function InstanceCard({
               <DialogClose type="button" className={buttonVariants({ variant: "outline" })}>
                 Cancel
               </DialogClose>
-              <DialogClose type="submit" render={<Button>OK</Button>} />
+              <SubmitButton pendingText="Signing up...">OK</SubmitButton>
             </div>
           </form>
         )}
