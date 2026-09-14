@@ -19,6 +19,11 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
       SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+      # Needed for e2e/become-admin.spec.ts: BecomeAdminButton renders
+      # nothing at all unless this is set (see its own comment in
+      # src/components/dashboards/becomeAdminButton.tsx) - only ever true
+      # here and in local .env.local, never in a real deployment's env.
+      ALLOW_SELF_ELEVATE: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
