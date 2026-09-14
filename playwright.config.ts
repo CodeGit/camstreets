@@ -19,7 +19,12 @@ export default defineConfig({
   // In CI, also write an HTML report (never auto-opened) so a failure can
   // be downloaded as a build artifact and inspected after the fact - the
   // list reporter alone leaves nothing behind once the job log scrolls by.
-  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
+  // "github" additionally turns each failure into a GitHub Actions
+  // annotation (file/line/message) - GitHub's own raw job logs require
+  // being signed in to view at all (even on a public repo), but
+  // annotations show up in the run summary with no auth needed, which is
+  // the only way to see *why* a CI failure happened without a GitHub login.
+  reporter: process.env.CI ? [["list"], ["html", { open: "never" }], ["github"]] : "list",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
