@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import type { Tables } from "@/lib/supabase/database.types";
 import { updateDisplayName } from "@/app/dashboard/actions";
 
-type Volunteer = Tables<"volunteers">;
+// Just `display_name` - not the full volunteers row.
+type Volunteer = Pick<Tables<"volunteers">, "display_name">;
 
 export default function WelcomeHeading({ volunteer }: { volunteer: Volunteer | null }) {
   const router = useRouter();

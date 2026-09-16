@@ -12,7 +12,9 @@ import UrlTabs from "./urlTabs";
 import MyCalendar from "./myCalendar";
 import BecomeAdminButton from "./becomeAdminButton";
 
-type Volunteer = Tables<"volunteers">;
+// Just `id` (used for MyCalendar) and `display_name` (forwarded to
+// WelcomeHeading) - not the full volunteers row.
+type Volunteer = Pick<Tables<"volunteers">, "id" | "display_name">;
 
 export default async function SuperuserDashboard({
   volunteer,

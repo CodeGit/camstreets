@@ -5,7 +5,8 @@ import { Select } from "@base-ui/react/select";
 import type { Tables } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/client";
 
-type Volunteer = Tables<"volunteers">;
+// Just `id` and `preferred_school_id` - not the full volunteers row.
+type Volunteer = Pick<Tables<"volunteers">, "id" | "preferred_school_id">;
 type School = Tables<"schools">;
 
 const NO_SCHOOL_SELECTED = { label: "Select a school from the list...", value: null };
