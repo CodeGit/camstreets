@@ -182,34 +182,45 @@ local-only by design (see [`supabase/README.md`](supabase/README.md)).
 ### 7. Creating a superuser
 
 A superuser is a distinct role from an ordinary volunteer or school admin -
-it's marked by `app_metadata.is_superuser = true` on the `auth.users` row,
-checked via the `public.is_superuser()` function used throughout the RLS
-policies. This flag can **only** be set through Supabase's Admin API or
-dashboard, using the project's `service_role` key - never through the
-public sign-in flow (`signInWithOtp`), since a volunteer must never be able
-to grant this to themselves. There is intentionally no in-app UI for this.
+it's marked by `is_superuser = true` on that person's row in
+**`public.volunteers`** (not `auth.users`/`app_metadata` - an earlier
+approach, moved away from in
+`20260731170107_superuser_from_volunteers_table.sql` specifically because
+syncing a JWT claim was awkward and easy to forget), checked via the
+`public.is_superuser()` function used throughout the RLS policies. Column-
+level grants (`20260730210606_add_admin_superuser_flags.sql`) already stop
+an authenticated user from writing their own `is_superuser` - it can only be
+set with the project's `service_role` key (via SQL Editor or Table Editor),
+never through the public sign-in flow. There is intentionally no in-app UI
+for this.
+
+Since `is_superuser()` reads `public.volunteers` live on every request
+(not from the JWT), a page refresh picks up the change - no sign-out/in
+needed.
 
 **Local development:**
 
-1. With the local stack running (`pnpm supabase start`), open the local
-   Studio URL it printed (`http://127.0.0.1:54323` by default).
-2. Go to **Authentication → Users → Add user → Create new user**.
-3. Enter an email (a fake one is fine - see below) and, under the user's
-   raw app metadata, set:
-   ```json
-   { "is_superuser": true }
+1. Sign up as normal via `/login` first (locally, `enable_confirmations` is
+   off and no real SMTP is configured - see `local_smtp` in
+   `supabase/config.toml` - so the magic-link email never leaves the
+   machine; view it via the local email-testing UI on port `54324`,
+   `http://127.0.0.1:54324`, instead of a real inbox). This creates your
+   `public.volunteers` row.
+2. With the local stack running (`pnpm supabase start`), open the local
+   Studio URL it printed (`http://127.0.0.1:54323` by default) → **SQL
+   Editor**, and run:
+   ```sql
+   update public.volunteers set is_superuser = true where id = '<your user id>';
    ```
-4. Sign in as that user via `/login` as normal. Since `enable_confirmations`
-   is off locally and no real SMTP is configured (see `local_smtp` in
-   `supabase/config.toml`), the magic-link email never leaves the machine -
-   view it via the local email-testing UI, also on port `54324`
-   (`http://127.0.0.1:54324`), instead of a real inbox.
+   (find `<your user id>` under Authentication → Users, or
+   `select id from auth.users where email = '...'`).
+3. Refresh the app - no need to sign out/in.
 
-**Hosted projects (dev/prod):** the equivalent is done from that project's
-own **Authentication → Users** page in the Supabase dashboard (or via the
-Admin API with the project's `service_role` key from a trusted server-side
-context - never expose that key to the client). Prefer testing against the
-**dev** project for this, same caution as pushing migrations above.
+**Hosted projects (dev/prod):** same idea, from that project's own **SQL
+Editor** page in the Supabase dashboard (or via a trusted server-side
+context using the project's `service_role` key - never expose that key to
+the client). Prefer testing against the **dev** project for this, same
+caution as pushing migrations above.
 
 **Testing multiple roles without multiple real inboxes:** on a hosted
 project (which does send real email), Gmail's `+` aliasing works well -

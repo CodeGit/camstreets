@@ -48,7 +48,7 @@ export default function WeekDayCell({
                 isSchoolMember={isSchoolMember}
                 isRegularCommitment={regularSlotIds.has(instance.slot_id)}
                 dimUnclaimed={dimUnclaimed}
-                variant="block"
+                variant="labeled"
               />
             ))}
           </div>

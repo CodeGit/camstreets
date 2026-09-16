@@ -29,51 +29,51 @@ const commonArgs = {
   isRegularCommitment: false,
 }
 
-// "card": the full day-view card - status pill plus one avatar circle per
-// capacity slot.
-export const CardVariant: Story = {
-  args: { ...commonArgs, currentVolunteerId: null, variant: 'card' },
+// "detailed": the full day-view card - status pill plus one avatar circle
+// per capacity slot.
+export const DetailedVariant: Story = {
+  args: { ...commonArgs, currentVolunteerId: null, variant: 'detailed' },
 }
 
-// "block": the week grid's compact cell - name badges, status text, and
+// "labeled": the week grid's compact cell - name badges, status text, and
 // (since Vera is signed in) her own commitment gets the bold outline.
-export const BlockVariantSignedIn: Story = {
-  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'block' },
+export const LabeledVariantSignedIn: Story = {
+  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'labeled' },
 }
 
-// "block" for an anonymous visitor - dimming never applies (there's no
+// "labeled" for an anonymous visitor - dimming never applies (there's no
 // "mine" to contrast against), and the card renders as a plain non-
 // interactive div rather than a dialog trigger.
-export const BlockVariantAnonymous: Story = {
-  args: { ...commonArgs, currentVolunteerId: null, variant: 'block' },
+export const LabeledVariantAnonymous: Story = {
+  args: { ...commonArgs, currentVolunteerId: null, variant: 'labeled' },
 }
 
-// "block", viewer is someone other than who's confirmed - on the public
+// "labeled", viewer is someone other than who's confirmed - on the public
 // school page (dimUnclaimed unset) this renders at full opacity, same as
 // everyone else's slots.
-export const BlockVariantOtherVolunteerPublicView: Story = {
-  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'block' },
+export const LabeledVariantOtherVolunteerPublicView: Story = {
+  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'labeled' },
 }
 
 // Same slot and viewer, but on the dashboard's "My calendar" tab
 // (dimUnclaimed) - since it's Vera's, not Alex's, it fades back.
-export const BlockVariantOtherVolunteerDashboardView: Story = {
-  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'block', dimUnclaimed: true },
+export const LabeledVariantOtherVolunteerDashboardView: Story = {
+  args: { ...commonArgs, currentVolunteerId: alex.id, variant: 'labeled', dimUnclaimed: true },
 }
 
-// "agenda": the term view's single-line row - status/capacity only, no
+// "summary": the term view's single-line row - status/capacity only, no
 // names, so a whole term stays scannable.
-export const AgendaVariant: Story = {
-  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'agenda' },
+export const SummaryVariant: Story = {
+  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'summary' },
 }
 
-// "swatch": the month grid's tiny colour-only square - all detail lives in
-// its aria-label rather than visible text.
-export const SwatchVariantSignedIn: Story = {
-  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'swatch' },
+// "glance": the month grid's tiny colour-only square - all detail lives in
+// its aria-label (and hover tooltip) rather than visible text.
+export const GlanceVariantSignedIn: Story = {
+  args: { ...commonArgs, currentVolunteerId: vera.id, variant: 'glance' },
 }
 
-export const SwatchVariantNotSignedUp: Story = {
+export const GlanceVariantNotSignedUp: Story = {
   args: {
     ...commonArgs,
     instance: mockInstance({
@@ -86,23 +86,23 @@ export const SwatchVariantNotSignedUp: Story = {
       volunteers: [],
     }),
     currentVolunteerId: vera.id,
-    variant: 'swatch',
+    variant: 'glance',
   },
 }
 
 // A slot with 2+ confirmed dates for the same volunteer looks like an
 // ongoing regular commitment - the cancel dialog offers "just this date"
 // vs "this and all future dates" instead of a plain confirmation.
-export const BlockVariantRegularCommitment: Story = {
+export const LabeledVariantRegularCommitment: Story = {
   args: {
     ...commonArgs,
     currentVolunteerId: vera.id,
     isRegularCommitment: true,
-    variant: 'block',
+    variant: 'labeled',
   },
 }
 
-export const BlockVariantFullyStaffed: Story = {
+export const LabeledVariantFullyStaffed: Story = {
   args: {
     ...commonArgs,
     instance: mockInstance({
@@ -115,6 +115,6 @@ export const BlockVariantFullyStaffed: Story = {
       volunteers: [vera, alex],
     }),
     currentVolunteerId: null,
-    variant: 'block',
+    variant: 'labeled',
   },
 }

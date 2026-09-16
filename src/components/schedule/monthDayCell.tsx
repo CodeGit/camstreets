@@ -7,7 +7,7 @@ function isAfternoon(startTime: string) {
 // One day's compact swatch grid within the month view (monthGrid.tsx) -
 // morning above afternoon, one swatch per location side by side within
 // each (start time + location as truncated text, colour-coded by status -
-// see instanceCard.tsx's "swatch" variant), the same session/location
+// see instanceCard.tsx's "glance" variant), the same session/location
 // shape as the week grid (week.tsx) just shrunk down so a whole month
 // fits on screen. `morningLocationIds`/`afternoonLocationIds` are the
 // full location lists for the WHOLE month (not just this day), passed in
@@ -61,7 +61,7 @@ export default function MonthDayCell({
               currentVolunteerId={currentVolunteerId}
               isSchoolMember={isSchoolMember}
               isRegularCommitment={regularSlotIds.has(instance.slot_id)}
-              variant="swatch"
+              variant="glance"
             />
           ) : (
             <div key={locationId} className="min-w-0 flex-1" aria-hidden="true" />

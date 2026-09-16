@@ -48,3 +48,6 @@ next-env.d.ts
 
 *storybook.log
 storybook-static
+
+# local-only working notes (code review docs, etc.) - never committed
+ARCHITECTURE_REVIEW.md

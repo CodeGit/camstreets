@@ -90,7 +90,7 @@ export default function TermAgenda({
                     currentVolunteerId={currentVolunteerId}
                     isSchoolMember={isSchoolMember}
                     isRegularCommitment={regularSlotIds.has(instance.slot_id)}
-                    variant="agenda"
+                    variant="summary"
                   />
                 ))}
               </div>

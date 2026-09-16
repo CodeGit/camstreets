@@ -9,11 +9,12 @@ function formatDayHeading(iso: string) {
   });
 }
 
-// One day's worth of full-width "card" instances, for the mobile
+// One day's worth of full-width "detailed" instances, for the mobile
 // swipe-per-day carousel in week.tsx (below the `sm` breakpoint, where the
-// 5-column grid stops fitting). Deliberately the plain "card" variant, not
-// "block" - at full mobile width there's room for the same legible layout
-// day.tsx already uses, rather than the grid's cramped, truncated cells.
+// 5-column grid stops fitting). Deliberately the plain "detailed" variant,
+// not "labeled" - at full mobile width there's room for the same legible
+// layout day.tsx already uses, rather than the grid's cramped, truncated
+// cells.
 // No prev/next nav of its own (unlike day.tsx) since the swipe gesture
 // itself is the navigation here, with the week-level prev/next in
 // week.tsx's own heading still covering "jump to a different week".

@@ -14,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import SubmitButton from "@/components/ui/submitButton";
 import type { Tables } from "@/lib/supabase/database.types";
 import { claimSlot, cancelSignup } from "./actions";
-import { volunteerBadgeClass } from "@/lib/volunteerColor";
+import { DetailedVariant, LabeledVariant, SummaryVariant, GlanceVariant } from "./instanceCardContent";
 
 export type ScheduleInstance = Tables<"slot_instances"> & {
   slot: Tables<"slots"> & {
@@ -36,9 +36,14 @@ function formatDate(iso: string) {
 
 // Shared by the day and week views - a single slot instance's coverage
 // status, avatar circles, and (for a signed-in viewer) a dialog to sign up
-// or cancel. `variant="card"` is the full card (day view); `variant="block"`
-// is a small colour-coded bar sized/positioned by the caller (the week
-// view's time grid) - same dialog underneath either way.
+// or cancel. `variant="detailed"` is the full card (day view);
+// `variant="labeled"` is a small colour-coded bar sized/positioned by the
+// caller (the week view's time grid) - same dialog underneath either way.
+//
+// The four variant names are deliberately one consistent scale - how much
+// information is shown, most to least - rather than each being named for
+// its own shape/metaphor (a "card", a "block", ...), which is what they
+// used to be called and why they never read as a set.
 export default function InstanceCard({
   instance,
   schoolId,
@@ -47,7 +52,7 @@ export default function InstanceCard({
   isSchoolMember,
   isRegularCommitment,
   dimUnclaimed = false,
-  variant = "card",
+  variant = "detailed",
 }: {
   instance: ScheduleInstance;
   schoolId: number;
@@ -62,15 +67,16 @@ export default function InstanceCard({
   // contrast against, and even a signed-in viewer browsing someone else's
   // commitments shouldn't see them all faded.
   dimUnclaimed?: boolean;
-  // "card": full day-view card with avatar circles. "block": compact week-
-  // grid cell with name badges. "agenda": a single-line row for a whole
-  // term's worth of dates (termAgenda.tsx) - status/capacity only, no
-  // names, since a term has far more dates than a week and needs to stay
-  // scannable rather than trying to show everyone. "swatch": the month
-  // grid's tiniest cell (monthDayCell.tsx) - just start time + location on
-  // one truncated line, colour-coded by status; no names, no capacity
-  // text (the fill colour already carries that).
-  variant?: "card" | "block" | "agenda" | "swatch";
+  // "detailed": full day-view card, avatar circles + status pill.
+  // "labeled": compact week-grid cell, name badges + status text.
+  // "summary": a single-line row for a whole term's worth of dates
+  // (termAgenda.tsx) - status/count only, no names, since a term has far
+  // more dates than a week and needs to stay scannable rather than trying
+  // to show everyone. "glance": the month grid's tiniest cell
+  // (monthDayCell.tsx) - just start time + location on one truncated
+  // line, colour-coded by status; no names, no status text (the fill
+  // colour already carries that).
+  variant?: "detailed" | "labeled" | "summary" | "glance";
 }) {
   const confirmed = instance.signups.filter((s) => s.status === "confirmed");
   const status =
@@ -125,132 +131,37 @@ export default function InstanceCard({
     </>
   );
 
-  const isBlock = variant === "block";
-  const isAgenda = variant === "agenda";
-  const isSwatch = variant === "swatch";
+  const isLabeled = variant === "labeled";
+  const isSummary = variant === "summary";
+  const isGlance = variant === "glance";
 
   const statusBgClass =
     status === "staffed" ? "bg-staffed-bg" : status === "partial" ? "bg-partial-bg" : "bg-open-bg";
   const statusTextClass =
     status === "staffed" ? "text-staffed" : status === "partial" ? "text-partial" : "text-open";
 
-  const blockContent = (
-    <div className="min-w-0 space-y-0.5 leading-tight">
-      <div className="truncate text-sm font-semibold">{instance.slot.location.name}</div>
-      <div className="truncate text-xs text-muted-foreground">
-        {instance.start_time.slice(0, 5)}–{instance.end_time.slice(0, 5)}
-      </div>
-      {confirmed.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {confirmed.map((s) => (
-            <span
-              key={s.id}
-              className={`max-w-full truncate rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ring-current/25 ${volunteerBadgeClass(s.volunteer_id)}`}
-            >
-              {s.volunteer.display_name}
-            </span>
-          ))}
-        </div>
-      )}
-      <div className={`truncate text-xs font-medium ${statusTextClass}`}>
-        {statusLabel} ({confirmed.length}/{instance.capacity})
-      </div>
-    </div>
-  );
-
-  // No names here (see the variant comment above) - just enough to say
-  // "this slot exists, this is its state" so a whole term stays scannable.
-  const agendaContent = (
-    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-      <div className="flex min-w-0 items-baseline gap-2">
-        <span className="truncate text-sm font-medium">{instance.slot.location.name}</span>
-        <span className="shrink-0 text-xs text-muted-foreground">
-          {instance.start_time.slice(0, 5)}–{instance.end_time.slice(0, 5)}
-        </span>
-      </div>
-      <span className={`shrink-0 text-xs font-medium ${statusTextClass}`}>
-        {statusLabel} ({confirmed.length}/{instance.capacity})
-      </span>
-    </div>
-  );
-
-  // The month grid's tightest variant - just enough to identify the slot
-  // at a glance without opening it: start time and location, truncated to
-  // one line. No status/capacity text (the fill colour already carries
-  // that, same as before) and no names, for the same scannability reason
-  // as the agenda.
-  const swatchContent = (
-    <span className="block truncate">
-      {instance.start_time.slice(0, 5)} {instance.slot.location.name}
-    </span>
-  );
-
-  // Status is shown as visible text on the block/agenda too now, but the
+  // Status is shown as visible text on labeled/summary too now, but the
   // aria-label still restates it alongside the date (which isn't shown on
-  // the block itself, and is only shown once per day group in the agenda)
+  // "labeled" itself, and is only shown once per day group in "summary")
   // - a screen reader announces the whole button in one go rather than
   // needing to parse several separate text nodes.
   const compactAriaLabel = `${summaryText}, ${statusLabel}`;
 
-  // A vertical stack, not a two-column split - the status pill and avatar
-  // circles used to sit on their own right-hand column alongside the
-  // location/time, which overlapped once the card got narrow enough (the
-  // mobile week-day carousel, a narrow "day" view, etc). flex-wrap on the
-  // status+avatars row means that even that combination drops to its own
-  // second line rather than overlapping if it ever runs out of room too.
-  const cardContent = (
-    <div className="min-w-0 w-full space-y-2">
-      <div className="min-w-0">
-        <div className="truncate font-medium">{instance.slot.location.name}</div>
-        <div className="text-sm text-muted-foreground">
-          {instance.start_time.slice(0, 5)}–{instance.end_time.slice(0, 5)}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusBgClass} ${statusTextClass}`}>
-          {statusLabel}
-        </span>
-        <div className="flex gap-1">
-          {Array.from({ length: instance.capacity }).map((_, i) => {
-            const signup = confirmed[i];
-            return signup ? (
-              <span
-                key={i}
-                title={signup.volunteer.display_name}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ring-1 ring-inset ring-current/25 ${volunteerBadgeClass(signup.volunteer_id)}`}
-              >
-                {signup.volunteer.display_name[0]}
-              </span>
-            ) : (
-              <span
-                key={i}
-                title="Needs a volunteer"
-                className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground"
-              >
-                +
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-
   const statusBorderClass =
     status === "staffed" ? "border-staffed" : status === "partial" ? "border-partial" : "border-open";
   const isMine = !!myConfirmedSignup;
-  // block, agenda and swatch share the same colour-coded look and
-  // aria-labelling; card is the odd one out (full-width, its own content
-  // already spells everything out visually).
-  const isCompact = isBlock || isAgenda || isSwatch;
+  // labeled, summary and glance share the same colour-coded look and
+  // aria-labelling; detailed is the odd one out (full-width, its own
+  // content already spells everything out visually).
+  const isCompact = isLabeled || isSummary || isGlance;
   // Only dim relative to the viewer's *own* slots, and only in the week
-  // grid (isBlock) on the dashboard's "My calendar" view (dimUnclaimed) -
-  // never for an anonymous visitor (there's no "mine" to contrast
+  // grid (isLabeled) on the dashboard's "My calendar" view (dimUnclaimed)
+  // - never for an anonymous visitor (there's no "mine" to contrast
   // against), never on the public school page (see the dimUnclaimed
-  // comment above), and not in the agenda/swatch views, where a still-
+  // comment above), and not in the summary/glance views, where a still-
   // open slot is the whole point of showing it (see the variant comment
   // above) rather than something to visually recede.
-  const shouldDim = isBlock && dimUnclaimed && !!currentVolunteerId && !isMine;
+  const shouldDim = isLabeled && dimUnclaimed && !!currentVolunteerId && !isMine;
 
   // Base look is identical whether or not this ends up clickable; only the
   // hover/focus affordance differs (added below for signed-in viewers). A
@@ -258,7 +169,7 @@ export default function InstanceCard({
   // all-round outline in a fixed, non-status colour (outline-foreground,
   // not a darker shade of the status hue - a same-family darker outline
   // read as "a slightly bolder box", not as a distinct claimed marker),
-  // plus a shadow except on the swatch (many sit close together in the
+  // plus a shadow except on "glance" (many sit close together in the
   // month grid, where a shadow per cell just looks noisy) - on top of the
   // normal look. In the week grid every other slot also fades back a bit,
   // so the viewer's own commitments stand out at a glance. Additive rather
@@ -267,15 +178,15 @@ export default function InstanceCard({
   // moment a test signs the viewer up for the very slot it's about to
   // re-locate.
   const emphasisClasses = isMine
-    ? `outline outline-2 -outline-offset-2 outline-foreground ${isSwatch ? "" : "shadow-md"}`
+    ? `outline outline-2 -outline-offset-2 outline-foreground ${isGlance ? "" : "shadow-md"}`
     : shouldDim
       ? "opacity-45"
       : "";
-  const baseClasses = isSwatch
+  const baseClasses = isGlance
     ? `min-w-0 flex-1 truncate rounded-sm border px-1 py-0.5 text-left text-[10px] leading-tight ${statusBgClass} ${statusBorderClass} ${statusTextClass} ${emphasisClasses}`
     : isCompact
       ? `w-full overflow-hidden rounded-md border-l-4 text-left ${statusBgClass} ${statusBorderClass} ${
-          isAgenda ? "flex items-center px-2 py-1.5" : "px-1.5 py-1"
+          isSummary ? "flex items-center px-2 py-1.5" : "px-1.5 py-1"
         } ${emphasisClasses}`
       : `flex w-full items-center rounded-lg border border-border p-4 text-left ${emphasisClasses}`;
   // Dimmed slots still brighten to full opacity on hover/focus so they
@@ -284,24 +195,45 @@ export default function InstanceCard({
   const interactiveClasses = isCompact
     ? `transition-opacity hover:opacity-80 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`
     : `transition-[opacity,colors] hover:opacity-100 hover:border-primary hover:bg-muted/40 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`;
-  const content = isBlock ? blockContent : isAgenda ? agendaContent : isSwatch ? swatchContent : cardContent;
 
-  // Swatches truncate to a single line (start time + location only, see
+  // Built once and reused both as the default ("detailed" variant) content
+  // and as the glance tooltip's preview below - same as before this file's
+  // four variants moved into instanceCardContent.tsx.
+  const detailedVariantContent = (
+    <DetailedVariant
+      instance={instance}
+      statusLabel={statusLabel}
+      statusBgClass={statusBgClass}
+      statusTextClass={statusTextClass}
+      confirmed={confirmed}
+    />
+  );
+  const content = isLabeled ? (
+    <LabeledVariant instance={instance} statusLabel={statusLabel} statusTextClass={statusTextClass} confirmed={confirmed} />
+  ) : isSummary ? (
+    <SummaryVariant instance={instance} statusLabel={statusLabel} statusTextClass={statusTextClass} confirmed={confirmed} />
+  ) : isGlance ? (
+    <GlanceVariant instance={instance} />
+  ) : (
+    detailedVariantContent
+  );
+
+  // "glance" truncates to a single line (start time + location only, see
   // the variant comment above) - a hover tooltip reveals the same detail
-  // the full "card" variant already shows (status, avatars) rather than
-  // requiring a click just to see what a swatch actually is.
-  const withSwatchTooltip = (trigger: React.ReactElement) =>
-    isSwatch ? (
+  // the full "detailed" variant already shows (status, avatars) rather
+  // than requiring a click just to see what it actually is.
+  const withGlanceTooltip = (trigger: React.ReactElement) =>
+    isGlance ? (
       <Tooltip>
         <TooltipTrigger render={trigger} />
-        <TooltipContent>{cardContent}</TooltipContent>
+        <TooltipContent>{detailedVariantContent}</TooltipContent>
       </Tooltip>
     ) : (
       trigger
     );
 
   if (!currentVolunteerId) {
-    return withSwatchTooltip(
+    return withGlanceTooltip(
       <div className={baseClasses} aria-label={isCompact ? compactAriaLabel : undefined}>
         {content}
       </div>
@@ -310,7 +242,7 @@ export default function InstanceCard({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {withSwatchTooltip(
+      {withGlanceTooltip(
         <DialogTrigger
           className={`${baseClasses} ${interactiveClasses}`}
           aria-label={isCompact ? compactAriaLabel : undefined}
