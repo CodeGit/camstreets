@@ -20,20 +20,17 @@ export default async function CalendarFeedLink() {
     return null;
   }
 
-  let { data: feed } = await supabase
+  // A pure read - the row is provisioned automatically the moment a
+  // volunteer is created (see the on_volunteer_created trigger,
+  // 20260916213125_create_calendar_feed_on_volunteer_insert.sql), so this
+  // component no longer needs a lazy insert-if-missing fallback. `!feed`
+  // should only ever happen for a volunteer somehow predating both that
+  // trigger and its one-time backfill.
+  const { data: feed } = await supabase
     .from("volunteer_calendar_feeds")
     .select("token")
     .eq("volunteer_id", user.id)
     .maybeSingle();
-
-  if (!feed) {
-    const { data: inserted } = await supabase
-      .from("volunteer_calendar_feeds")
-      .insert({ volunteer_id: user.id })
-      .select("token")
-      .single();
-    feed = inserted;
-  }
 
   if (!feed) {
     return null;
