@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { User } from "@supabase/supabase-js";
 import type { Tables } from "@/lib/supabase/database.types";
 import { Geist, Geist_Mono, Fredoka } from "next/font/google";
 import Navbar from "@/components/navbar";
@@ -61,7 +60,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${fredoka.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar user={user} volunteer={volunteer} />
+        <Navbar volunteer={volunteer} />
         <div className="flex-1">{children}</div>
         <Footer />
       </body>

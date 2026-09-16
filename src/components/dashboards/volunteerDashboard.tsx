@@ -3,7 +3,9 @@ import WelcomeHeading from "@/components/dashboards/welcomeHeading";
 import MyCalendar from "./myCalendar";
 import BecomeAdminButton from "./becomeAdminButton";
 
-type Volunteer = Tables<"volunteers">;
+// Just `id` (for MyCalendar) and `display_name` (forwarded to
+// WelcomeHeading) - not the full volunteers row.
+type DashboardVolunteer = Pick<Tables<"volunteers">, "id" | "display_name">;
 
 export default function VolunteerDashboard({
   volunteer,
@@ -11,7 +13,7 @@ export default function VolunteerDashboard({
   date,
   view,
 }: {
-  volunteer: Volunteer | null;
+  volunteer: DashboardVolunteer | null;
   selectedSchoolId?: number;
   date?: string;
   view?: string;

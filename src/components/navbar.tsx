@@ -3,16 +3,20 @@ import { JSX } from "react/jsx-runtime";
 import { LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { User } from '@supabase/supabase-js';
 import type { Tables } from "@/lib/supabase/database.types";
 import { buttonVariants } from "@/components/ui/button";
 import SubmitButton from "@/components/ui/submitButton";
 import SchoolSwitcher from "@/components/schoolSwitcher";
 import { signOut } from "@/app/actions";
 
-type Volunteer = Tables<"volunteers">;
+// Just what this component and SchoolSwitcher (which it forwards the same
+// object to) actually read - not the full volunteers row. No `user` prop
+// either: it used to take one (the Supabase auth User) but never actually
+// read it anywhere in the body - `volunteer` alone already determines
+// every branch below.
+type NavbarVolunteer = Pick<Tables<"volunteers">, "id" | "display_name" | "preferred_school_id">;
 
-function Navbar({ user, volunteer }: { user: User | null; volunteer: Volunteer | null }) {
+function Navbar({ volunteer }: { volunteer: NavbarVolunteer | null }) {
   const router = useRouter();
   const switchSchool = (schoolId: number | null) => {  
     if (schoolId === null) {
