@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { fn } from 'storybook/test'
 
-import SchoolSwitcher from './schoolSwitcher'
+import NavbarSchoolSwitcher from './navbarSchoolSwitcher'
 
 const mockSchools = [
   { id: 1, name: 'Newnham Croft Primary', street: null, town: null, active: true, is_demo: false, created_at: '' },
@@ -9,15 +9,15 @@ const mockSchools = [
   { id: 3, name: 'Trumpington Park Primary', street: null, town: null, active: true, is_demo: false, created_at: '' },
 ]
 
-const meta: Meta<typeof SchoolSwitcher> = {
-  title: 'Components/SchoolSwitcher',
-  component: SchoolSwitcher,
+const meta: Meta<typeof NavbarSchoolSwitcher> = {
+  title: 'Components/NavbarSchoolSwitcher',
+  component: NavbarSchoolSwitcher,
   args: {
     volunteer: null,
     fetchSchoolsAction: async () => mockSchools,
     onSchoolSelectionAction: fn(),
   },
-} satisfies Meta<typeof SchoolSwitcher>
+} satisfies Meta<typeof NavbarSchoolSwitcher>
 
 export default meta
 type Story = StoryObj<typeof meta>

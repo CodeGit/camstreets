@@ -4,6 +4,31 @@
 # working directory name when running `supabase init`.
 project_id = "camstreets"
 
+# Per-project overrides for `supabase config push` - without these, pushing
+# this file's root [auth] section (site_url = "http://localhost:3000", etc.)
+# to a hosted project would overwrite its real site_url/redirect_urls with
+# the local dev values, breaking magic-link sign-in for every real user.
+# Values below mirror exactly what's live in each project's dashboard
+# (Authentication -> URL Configuration) as of 2026-09-17 - keep them in sync
+# by hand if that's ever changed there directly.
+[remotes.dev]
+project_id = "snquofgpzpjguluglbif"
+
+[remotes.dev.auth]
+site_url = "https://dev.camstreets.org"
+additional_redirect_urls = [
+  "https://dev.camstreets.org/**",
+  "https://*-code-git-vercel.vercel.app/**",
+  "http://localhost:3000/**",
+]
+
+[remotes.prod]
+project_id = "acchajbsrxirldadwgnn"
+
+[remotes.prod.auth]
+site_url = "https://www.camstreets.org"
+additional_redirect_urls = ["https://www.camstreets.org/**"]
+
 [api]
 enabled = true
 # Port to use for the API URL.

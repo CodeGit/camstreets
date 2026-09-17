@@ -6,11 +6,11 @@ import Link from "next/link";
 import type { Tables } from "@/lib/supabase/database.types";
 import { buttonVariants } from "@/components/ui/button";
 import SubmitButton from "@/components/ui/submitButton";
-import SchoolSwitcher from "@/components/schoolSwitcher";
+import NavbarSchoolSwitcher from "@/components/navbarSchoolSwitcher";
 import { signOut } from "@/app/actions";
 
-// Just what this component and SchoolSwitcher (which it forwards the same
-// object to) actually read - not the full volunteers row. No `user` prop
+// Just what this component and NavbarSchoolSwitcher (which it forwards the
+// same object to) actually read - not the full volunteers row. No `user` prop
 // either: it used to take one (the Supabase auth User) but never actually
 // read it anywhere in the body - `volunteer` alone already determines
 // every branch below.
@@ -62,7 +62,7 @@ function Navbar({ volunteer }: { volunteer: NavbarVolunteer | null }) {
       </div>
       <div className="flex w-full items-center gap-2 sm:w-auto">
         <span className="shrink-0 text-sm font-medium text-muted-foreground">View timetable:</span>
-        <SchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
+        <NavbarSchoolSwitcher volunteer={volunteer} onSchoolSelectionAction={switchSchool}/>
       </div>
     </nav>
   );

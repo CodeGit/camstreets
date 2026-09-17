@@ -6,14 +6,15 @@ import { Select } from "@base-ui/react/select";
 type School = { id: number; name: string };
 
 // Compact inline selector for a dashboard's school-scoped tabs - unlike
-// schoolSwitcher.tsx (navbar-wide, fetches its own school list client side,
-// navigates to a school's public page), this takes the already
+// NavbarSchoolSwitcher (navbar-wide, fetches its own school list client
+// side, navigates to a school's public page), this takes the already
 // server-fetched schools as a prop and navigates via a query param the
-// dashboard reads. `paramName` lets two independent selectors coexist on the
-// same page (e.g. the admin's own "Your schools" management pick and "My
-// calendar"'s pick) - selecting one merges into the existing query string
-// rather than replacing it, so it doesn't clobber the other's selection.
-export default function SchoolSelector({
+// dashboard reads, without leaving the page. `paramName` lets two
+// independent selectors coexist on the same page (e.g. the admin's own
+// "Your schools" management pick and "My calendar"'s pick) - selecting one
+// merges into the existing query string rather than replacing it, so it
+// doesn't clobber the other's selection.
+export default function DashboardSchoolSelector({
   schools,
   selectedSchoolId,
   paramName = "school",

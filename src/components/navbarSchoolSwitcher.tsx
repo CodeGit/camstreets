@@ -19,38 +19,20 @@ export const fetchAllSchoolsFromSupabase: FetchSchoolsActionType = async (volunt
   return data ?? [];
 };
 
-export const fetchAdminSchoolsFromSupabase: FetchSchoolsActionType = async (volunteerId) => {
-  if (!volunteerId) return [];
-  const supabase = createClient();
-  const { data } = await supabase
-    .from("schools")
-    .select("*, school_admins!inner(*)")
-    .eq("school_admins.volunteer_id", volunteerId)
-    .order("name");
-  return data ?? [];
-}
-
-export const fetchVolunteerSchoolsFromSupabase: FetchSchoolsActionType = async (volunteerId) => {
-  if (!volunteerId) return [];
-  const supabase = createClient();
-  const { data } = await supabase
-    .from("schools")
-    .select("*, volunteer_schools!inner(*)")
-    .eq("volunteer_schools.volunteer_id", volunteerId)
-    .order("name");
-  return data ?? [];
-}
-
-export default function SchoolSwitcher({
+// The navbar's "View timetable" picker - unlike DashboardSchoolSelector
+// (dashboard-scoped, takes an already server-fetched list, updates a query
+// param without leaving the page), this lives in the navbar so it has no
+// page-provided list to work from: it fetches its own schools client-side,
+// lazily on first open, and navigates to a different route entirely
+// (a school's public page, or "/" for "All schools").
+export default function NavbarSchoolSwitcher({
   volunteer,
   fetchSchoolsAction = fetchAllSchoolsFromSupabase,
   onSchoolSelectionAction,
-  showAllSchoolsOption = true,
 }: {
   volunteer: Volunteer | null;
   fetchSchoolsAction?: FetchSchoolsActionType;
   onSchoolSelectionAction?: (schoolId: number | null) => void;
-  showAllSchoolsOption?: boolean;
 }) {
   const [schools, setSchools] = useState<School[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,23 +47,24 @@ export default function SchoolSwitcher({
     setLoading(false);
   };
 
-  // fetch schools when the component mounts if the schools are not already loaded and the default school is not set or if the "All Schools" option is not shown.
+  // Fetch schools when the component mounts if a default school is already
+  // selected (the picker needs the full list to show it as selected, even
+  // before the user opens the dropdown themselves).
   useEffect(() => {
     if (schools !== null) return;
-    if (defaultSchool !== null || !showAllSchoolsOption) {
+    if (defaultSchool !== null) {
       handleOpenChange(true);
     }
   }, [])
 
-  // this is required when filtering schools for admins/volunteer dashboards.
+  // Keeps the selection in sync if the volunteer's preferred school changes
+  // (e.g. after they update it elsewhere and this component re-renders).
   useEffect(() => {
     if (!schools || schools.length === 0) return;
     const preferredId = volunteer?.preferred_school_id ?? null;
     const preferredIdIsInList = preferredId !== null && schools.some((s) => s.id === preferredId);
     if (preferredIdIsInList) {
       setDefaultSchool(preferredId);
-    } else if (!showAllSchoolsOption) {
-      setDefaultSchool(schools[0].id);
     }
   }, [schools]);
 
@@ -94,8 +77,8 @@ export default function SchoolSwitcher({
     label: school.name,
     value: school.id,
   }));
-  const schoolSelectOptions:{label: string, value: number | null}[] = showAllSchoolsOption ? [NO_SCHOOL_SELECTED, ...schoolOptions] : schoolOptions;
-  
+  const schoolSelectOptions: { label: string; value: number | null }[] = [NO_SCHOOL_SELECTED, ...schoolOptions];
+
   return (
     <Select.Root
       items={schoolSelectOptions}

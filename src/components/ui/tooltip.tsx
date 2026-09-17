@@ -1,7 +1,7 @@
 "use client";
 
 // Thin styled wrapper around @base-ui/react/tooltip, matching the
-// dialog.tsx/schoolSwitcher.tsx Select pattern already used in this app
+// dialog.tsx/navbarSchoolSwitcher.tsx Select pattern already used in this app
 // (Portal > Positioner > Popup, transition classes keyed off base-ui's
 // data-[starting-style]/data-[ending-style] attributes).
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";

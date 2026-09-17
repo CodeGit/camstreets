@@ -117,9 +117,9 @@ for (const role of ROLES) {
       // A single one-off signup isn't an "ongoing commitment" yet, so
       // cancelling shows the plain confirmation, not the extended choice.
       await cardLocator(page, role.location, role.timeFilter).click();
-      await expect(page.getByText("Cancel this signup?")).toBeVisible();
+      await expect(page.getByText("Remove this signup?")).toBeVisible();
       await expect(page.getByText("Just this date")).toHaveCount(0);
-      await page.getByRole("button", { name: "Cancel signup" }).click();
+      await page.getByRole("button", { name: "Remove signup" }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(cardLocator(page, role.location, role.timeFilter)).toHaveAccessibleName(
         /Needs volunteers/
@@ -154,7 +154,7 @@ for (const role of ROLES) {
       await midWeekCard.click();
       await expect(page.getByText("Just this date")).toBeVisible();
       await expect(page.getByText("This and all future dates")).toBeVisible();
-      await page.getByRole("button", { name: "Cancel" }).click(); // "Just this date" is the default
+      await page.getByRole("button", { name: "Remove" }).click(); // "Just this date" is the default
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(cardLocator(page, role.location, role.timeFilter)).toHaveAccessibleName(
         /Needs volunteers/
@@ -174,7 +174,7 @@ for (const role of ROLES) {
       const laterWeekCard = cardLocator(page, role.location, role.timeFilter);
       await laterWeekCard.click();
       await page.getByLabel("This and all future dates").check();
-      await page.getByRole("button", { name: "Cancel" }).click();
+      await page.getByRole("button", { name: "Remove" }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(cardLocator(page, role.location, role.timeFilter)).toHaveAccessibleName(
         /Needs volunteers/

@@ -51,13 +51,13 @@ test("a signed-in volunteer can open the sign-up dialog, choose one-off, and lat
 
   // Clicking the now-signed-up card opens a cancel confirmation instead
   await newnhamAfternoon(page).click();
-  await expect(page.getByText("Cancel this signup?")).toBeVisible();
+  await expect(page.getByText("Remove this signup?")).toBeVisible();
   await page.getByRole("button", { name: "Keep it" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(newnhamAfternoon(page)).toHaveAccessibleName(/Needs\ more\ volunteers/);
 
   await newnhamAfternoon(page).click();
-  await page.getByRole("button", { name: "Cancel signup" }).click();
+  await page.getByRole("button", { name: "Remove signup" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(newnhamAfternoon(page)).toHaveAccessibleName(/Needs\ volunteers/);
 });
@@ -86,7 +86,7 @@ test("choosing 'regular' signs up every remaining week of the academic year (not
 
   // Cancelling that Spring week doesn't touch the rest of the commitment.
   await newnhamAfternoon(page).click();
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Remove" }).click();
   await expect(newnhamAfternoon(page)).toHaveAccessibleName(/Needs\ volunteers/);
 
   await page.goto("/schools/1?date=2026-09-07");
@@ -125,7 +125,7 @@ test("cancelling a signup that looks like an ongoing regular commitment offers a
   await expect(page.getByText("This and all future dates")).toBeVisible();
 
   // "Just this date" only cancels the one clicked.
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Remove" }).click();
   await expect(grantchesterMorning(page)).toHaveAccessibleName(/Needs\ volunteers/);
 
   await page.goto("/schools/1?date=2026-09-28");
@@ -135,7 +135,7 @@ test("cancelling a signup that looks like an ongoing regular commitment offers a
   // one, leaving earlier dates untouched.
   await grantchesterMorning(page).click();
   await page.getByLabel("This and all future dates").check();
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Remove" }).click();
   await expect(grantchesterMorning(page)).toHaveAccessibleName(/Needs\ volunteers/);
 
   await page.goto("/schools/1?date=2026-09-07");

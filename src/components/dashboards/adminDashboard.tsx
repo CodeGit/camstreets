@@ -4,7 +4,7 @@ import WelcomeHeading from "@/components/dashboards/welcomeHeading";
 import { buttonVariants } from "@/components/ui/button";
 import { TabsList, TabsTab, TabsPanel } from "@/components/ui/tabs";
 import Link from "next/link";
-import SchoolSelector from "../schools/schoolSelector";
+import DashboardSchoolSelector from "./schoolSelector";
 import SchoolManagementTabs from "../schools/schoolManagementTabs";
 import UrlTabs from "./urlTabs";
 import MyCalendar from "./myCalendar";
@@ -80,7 +80,7 @@ export default async function AdminDashboard({
             <h2 className="text-lg font-medium">Administer</h2>
             {schools && schools.length > 0 && effectiveSchoolId && (
               <>
-                <SchoolSelector schools={selectorSchools} selectedSchoolId={effectiveSchoolId} />
+                <DashboardSchoolSelector schools={selectorSchools} selectedSchoolId={effectiveSchoolId} />
                 {isEffectiveSchoolAdmin && (
                   <Link
                     href={`/schools/${effectiveSchoolId}/edit`}

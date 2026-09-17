@@ -254,7 +254,7 @@ export default function InstanceCard({
         {myConfirmedSignup ? (
           isRegularCommitment ? (
             <form action={cancelFormAction} className="space-y-4">
-              <DialogTitle>Cancel this signup?</DialogTitle>
+              <DialogTitle>Remove this signup?</DialogTitle>
               <DialogDescription>{summaryLines}</DialogDescription>
               <div className="space-y-2 text-sm">
                 <label className="flex items-center gap-2">
@@ -270,22 +270,22 @@ export default function InstanceCard({
                 <DialogClose type="button" className={buttonVariants({ variant: "outline" })}>
                   Keep it
                 </DialogClose>
-                <SubmitButton variant="destructive" pendingText="Cancelling...">
-                  Cancel
+                <SubmitButton variant="destructive" pendingText="Removing...">
+                  Remove
                 </SubmitButton>
               </div>
             </form>
           ) : (
             <>
-              <DialogTitle>Cancel this signup?</DialogTitle>
+              <DialogTitle>Remove this signup?</DialogTitle>
               <DialogDescription>{summaryLines}</DialogDescription>
               <div className="flex justify-end gap-2">
                 <DialogClose type="button" className={buttonVariants({ variant: "outline" })}>
                   Keep it
                 </DialogClose>
                 <form action={cancelFormAction}>
-                  <SubmitButton variant="destructive" pendingText="Cancelling...">
-                    Cancel signup
+                  <SubmitButton variant="destructive" pendingText="Removing...">
+                    Remove signup
                   </SubmitButton>
                 </form>
               </div>

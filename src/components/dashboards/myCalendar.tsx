@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { TabsList, TabsTab } from "@/components/ui/tabs";
-import SchoolSelector from "@/components/schools/schoolSelector";
+import DashboardSchoolSelector from "@/components/dashboards/schoolSelector";
 import SchoolDayCalendar from "@/components/schedule/schoolDayCalendar";
 import SchoolWeekCalendar from "@/components/schedule/schoolWeekCalendar";
 import SchoolMonthCalendar from "@/components/schedule/schoolMonthCalendar";
@@ -77,7 +77,7 @@ export default async function MyCalendar({
       <CalendarFeedLink />
       <div className="flex flex-wrap items-center gap-3">
         {schools.length > 1 && (
-          <SchoolSelector schools={schools} selectedSchoolId={effectiveSchoolId} paramName={paramName} />
+          <DashboardSchoolSelector schools={schools} selectedSchoolId={effectiveSchoolId} paramName={paramName} />
         )}
         <UrlTabs activeTab={effectiveView} paramName="view">
           <TabsList>
