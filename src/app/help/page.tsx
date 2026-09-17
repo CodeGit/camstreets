@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "How to volunteer - Cambridge School Streets",
@@ -26,6 +27,20 @@ export default function HelpPage() {
           <strong>Send magic link</strong> - there&apos;s no password to remember. Check your email for a sign-in
           link and click it; that&apos;s it, you&apos;re in.
         </p>
+        <Image
+          src="/help/sign-in-component-1.1.png"
+          alt="The camstreets home page for a signed-out visitor, with a Sign in button"
+          width={726}
+          height={266}
+          className="w-full h-auto rounded-lg border border-border"
+        />
+        <Image
+          src="/help/sign-in-email-1.2.png"
+          alt="The sign-in email from Camstreets, with a Sign in link and a note that it expires in 24 hours"
+          width={1049}
+          height={351}
+          className="w-full h-auto rounded-lg border border-border"
+        />
         <p className="text-sm text-muted-foreground">
           The link is single-use and works only in the browser you requested it from, so if it doesn&apos;t work,
           just go back and request a new one.
@@ -36,9 +51,23 @@ export default function HelpPage() {
         <h2 className="text-lg font-medium text-foreground">2. Find your school</h2>
         <p>
           Once you&apos;re signed in, use the <strong>View timetable</strong>&nbsp;dropdown in the top bar to pick a
-          school. This takes you to that school&apos;s public weekly timetable. You can view barrier locations 
+          school. This takes you to that school&apos;s public weekly timetable. You can view barrier locations
           and times which still need volunteers.
         </p>
+        <Image
+          src="/help/select-school-dropdown-2.1.png"
+          alt="The View timetable dropdown open, listing several schools to choose from"
+          width={622}
+          height={309}
+          className="w-full h-auto rounded-lg border border-border"
+        />
+        <Image
+          src="/help/default-week-timetable-2.2.png"
+          alt="A school's weekly timetable, showing crossing locations and times, coloured by how well-staffed each slot is"
+          width={2545}
+          height={889}
+          className="w-full h-auto rounded-lg border border-border"
+        />
         <p>
           You can browse and change schools this way at any time, whether or not you&apos;ve signed up to volunteer
           for them yet.
@@ -48,6 +77,13 @@ export default function HelpPage() {
       <section className="space-y-2">
         <h2 className="text-lg font-medium text-foreground">3. Sign up for a slot</h2>
         <p>Click any slot that still needs volunteers. A dialog opens where you choose:</p>
+        <Image
+          src="/help/sign-up-3.1.png"
+          alt="The sign-up dialog for a slot, with a choice between a one-off date and a regular weekly commitment"
+          width={765}
+          height={537}
+          className="w-full h-auto rounded-lg border border-border"
+        />
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <strong>One-off - just this date</strong> - covers only the date you clicked.
