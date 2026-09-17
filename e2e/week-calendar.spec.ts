@@ -36,7 +36,7 @@ test("a signed-in volunteer can open the sign-up dialog, choose one-off, and lat
   await card.click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByText("One-off - just this date")).toBeVisible();
-  await expect(page.getByText("Regular - every week for the rest of the academic year")).toBeVisible();
+  await expect(page.getByLabel(/Regular/)).toBeVisible();
 
   // Clicking outside the dialog dismisses it without submitting anything
   await page.mouse.click(10, 10);
@@ -69,7 +69,7 @@ test("choosing 'regular' signs up every remaining week of the academic year (not
   await page.goto("/schools/1?date=2026-09-07");
 
   await newnhamAfternoon(page).click();
-  await page.getByLabel("Regular - every week for the rest of the academic year").check();
+  await page.getByLabel(/Regular/).check();
   await page.getByRole("button", { name: "OK" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(newnhamAfternoon(page)).toHaveAccessibleName(/Needs\ more\ volunteers/);
@@ -101,6 +101,43 @@ function grantchesterMorning(page: import("@playwright/test").Page) {
     .filter({ hasText: "08:20" })
     .first();
 }
+
+function grantchesterAfternoon(page: import("@playwright/test").Page) {
+  return page
+    .locator("button.border-l-4", { hasText: "Grantchester Street crossing" })
+    .filter({ hasText: "15:00" })
+    .first();
+}
+
+test("choosing a fortnightly interval confirms every other week, skipping the weeks in between", async ({
+  page,
+}) => {
+  await signInAs(page, "volunteer@example.com");
+  await page.goto("/schools/1?date=2026-09-07");
+
+  await grantchesterAfternoon(page).click();
+  await page.getByLabel(/Regular/).check();
+  await page.locator('select[name="frequency"]').selectOption("2");
+  await page.getByRole("button", { name: "OK" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  // Anchor week: confirmed.
+  await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ more\ volunteers/);
+
+  // +1 week: skipped - a weekly "regular" would have claimed this, a
+  // fortnightly one shouldn't.
+  await page.goto("/schools/1?date=2026-09-14");
+  await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ volunteers/);
+
+  // +2 weeks: confirmed again, back on the fortnightly cadence.
+  await page.goto("/schools/1?date=2026-09-21");
+  await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ more\ volunteers/);
+
+  // +3 weeks: skipped again - confirms the pattern repeats rather than the
+  // +2-week hit being a coincidence.
+  await page.goto("/schools/1?date=2026-09-28");
+  await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ volunteers/);
+});
 
 test("cancelling a signup that looks like an ongoing regular commitment offers a one-off vs. this-and-future choice", async ({
   page,

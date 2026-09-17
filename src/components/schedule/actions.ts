@@ -74,6 +74,11 @@ export async function claimSlot(slotInstanceId: number, schoolId: number, formDa
   const commitmentType = formData.get("commitment_type");
 
   if (commitmentType === "regular") {
+    // "week" (1) or "fortnight" (2) - see the <select name="frequency">
+    // next to the "Regular" radio. Falls back to weekly on anything
+    // missing/unparseable rather than rejecting the submission outright.
+    const intervalWeeks = Math.max(1, Number(formData.get("frequency")) || 1);
+
     const { data: instance, error: instanceError } = await supabase
       .from("slot_instances")
       .select("slot_id, date")
@@ -89,18 +94,32 @@ export async function claimSlot(slotInstanceId: number, schoolId: number, formDa
     // automatically as they're added later.
     const { data: matchingInstances, error: matchError } = await supabase
       .from("slot_instances")
-      .select("id")
+      .select("id, date")
       .eq("slot_id", instance.slot_id)
       .gte("date", instance.date);
     if (matchError) {
       throw new Error(`Failed to find this slot's remaining dates: ${matchError.message}`);
     }
 
-    const rows = (matchingInstances ?? []).map((match) => ({
-      slot_instance_id: match.id,
-      volunteer_id: user.id,
-      status: "confirmed" as const,
-    }));
+    // instances are one per calendar week (with gaps for bank holidays/inset
+    // days), so "every Nth week" has to be computed from the actual date
+    // difference to the anchor date, not every Nth *row* - an array-index
+    // stride would silently drift off-pattern the moment a gap skips a week.
+    const anchorDate = new Date(`${instance.date}T00:00:00Z`);
+    const isOnInterval = (dateStr: string) => {
+      const weeksSinceAnchor = Math.round(
+        (new Date(`${dateStr}T00:00:00Z`).getTime() - anchorDate.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      );
+      return weeksSinceAnchor % intervalWeeks === 0;
+    };
+
+    const rows = (matchingInstances ?? [])
+      .filter((match) => isOnInterval(match.date))
+      .map((match) => ({
+        slot_instance_id: match.id,
+        volunteer_id: user.id,
+        status: "confirmed" as const,
+      }));
     const { error } = await supabase
       .from("signups")
       .upsert(rows, { onConflict: "slot_instance_id,volunteer_id" });

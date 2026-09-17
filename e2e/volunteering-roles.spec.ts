@@ -134,7 +134,7 @@ for (const role of ROLES) {
       await page.goto(`/schools/1?date=${WEEK_0}`);
 
       await cardLocator(page, role.location, role.timeFilter).click();
-      await page.getByLabel("Regular - every week for the rest of the academic year").check();
+      await page.getByLabel(/Regular/).check();
       await page.getByRole("button", { name: "OK" }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(cardLocator(page, role.location, role.timeFilter)).toHaveAccessibleName(

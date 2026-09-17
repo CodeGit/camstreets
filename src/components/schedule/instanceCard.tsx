@@ -300,9 +300,20 @@ export default function InstanceCard({
                 <input type="radio" name="commitment_type" value="one_off" defaultChecked />
                 One-off - just this date
               </label>
-              <label className="flex items-center gap-2">
-                <input type="radio" name="commitment_type" value="regular" />
-                Regular - every week for the rest of the academic year
+              <label className="flex items-start gap-2">
+                <input type="radio" name="commitment_type" value="regular" className="mt-1" />
+                <span>
+                  Regular - every{" "}
+                  <select
+                    name="frequency"
+                    defaultValue="1"
+                    className="mx-0.5 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-sm"
+                  >
+                    <option value="1">week</option>
+                    <option value="2">fortnight</option>
+                  </select>{" "}
+                  for the rest of the academic year
+                </span>
               </label>
             </div>
             {!isSchoolMember && (
