@@ -1,0 +1,60 @@
+name: Production liveness
+
+# Email-free health probe of the live site (e2e-prod/liveness.spec.ts):
+# public pages render, the school list loads from the database, and a
+# signed-in session is accepted by the server. Signs in as a dedicated
+# monitor user via an admin-generated link, so it sends no email and can
+# run often. The real-email login flow is prod-email-login.yml.
+#
+# A failure here emails whoever last edited this workflow's schedule
+# (GitHub's default for scheduled workflows) - check Settings >
+# Notifications > Actions if that isn't reaching you.
+#
+# Required repo secrets (Settings > Secrets and variables > Actions):
+#   PROD_SUPABASE_URL               - the prod project's URL
+#   PROD_SUPABASE_ANON_KEY          - its public (anon/publishable) key
+#   PROD_SUPABASE_SERVICE_ROLE_KEY  - its service-role key (used ONLY here,
+#                                     to mint the monitor user's session)
+#   MONITOR_EMAIL                   - the monitor user's address
+
+on:
+  schedule:
+    # Every 30 minutes, off the top of the hour (GitHub's scheduler is
+    # busiest then and often delays or drops runs).
+    - cron: "7,37 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: prod-liveness
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  liveness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run liveness probes
+        env:
+          BASE_URL: https://www.camstreets.org
+          SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          MONITOR_EMAIL: ${{ secrets.MONITOR_EMAIL }}
+        run: pnpm exec playwright test -c playwright.prod.config.ts liveness
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: liveness-traces
+          path: test-results/
+          retention-days: 7

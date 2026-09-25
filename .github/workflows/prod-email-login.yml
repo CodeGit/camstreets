@@ -1,0 +1,69 @@
+name: Production email login
+
+# The full real sign-in (e2e-prod/email-login.spec.ts): login form ->
+# Supabase Auth -> SMTP2GO -> the monitor inbox (read over IMAP) -> the
+# emailed link -> /auth/callback -> a signed-in session. Sends one real
+# email per run, so it runs 4x a day (~120/month) rather than every 30
+# minutes - SMTP2GO's monthly allowance is the constraint. It also asserts
+# the email's sender, subject and "24 hours" wording, which catches the
+# hand-edited hosted email template drifting from the repo (see TODO.md).
+#
+# Deliberately does NOT receive the service-role key - only what a real
+# user would have (the site, and an inbox).
+#
+# Required repo secrets:
+#   MONITOR_EMAIL         - the monitor user's address (e.g. a Gmail
+#                           plus-address that forwards to the inbox below)
+#   MONITOR_IMAP_HOST     - e.g. imap.gmail.com
+#   MONITOR_IMAP_USER     - the inbox's login. Use a dedicated throwaway
+#                           inbox, not a personal one - an IMAP app
+#                           password can read the WHOLE mailbox.
+#   MONITOR_IMAP_PASSWORD - an app password for it
+#
+# Until those exist the probe skips itself (with a warning annotation)
+# rather than failing.
+
+on:
+  schedule:
+    - cron: "23 3,9,15,21 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: prod-email-login
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  email-login:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://www.camstreets.org
+      MONITOR_EMAIL: ${{ secrets.MONITOR_EMAIL }}
+      IMAP_HOST: ${{ secrets.MONITOR_IMAP_HOST }}
+      IMAP_USER: ${{ secrets.MONITOR_IMAP_USER }}
+      IMAP_PASSWORD: ${{ secrets.MONITOR_IMAP_PASSWORD }}
+    steps:
+      - name: Warn if not configured
+        run: |
+          if [ -z "$MONITOR_EMAIL" ] || [ -z "$IMAP_HOST" ] || [ -z "$IMAP_USER" ] || [ -z "$IMAP_PASSWORD" ]; then
+            echo "::warning::MONITOR_EMAIL / MONITOR_IMAP_* secrets are not all set - the email-login probe will be skipped"
+          fi
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run email-login probe
+        run: pnpm exec playwright test -c playwright.prod.config.ts email-login
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: email-login-traces
+          path: test-results/
+          retention-days: 7
