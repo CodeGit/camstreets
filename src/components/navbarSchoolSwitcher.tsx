@@ -86,7 +86,7 @@ export default function NavbarSchoolSwitcher({
       onValueChange={handleValueChange}
       onOpenChange={handleOpenChange}
     >
-      <Select.Trigger className="flex max-w-[80vw] items-center gap-1 overflow-hidden px-2.5 py-1 text-sm rounded-lg border border-border bg-background sm:max-w-96">
+      <Select.Trigger className="flex max-w-[80vw] items-center gap-1 overflow-hidden min-h-11 px-3 py-2 text-base md:min-h-0 md:px-2.5 md:py-1 md:text-sm rounded-lg border border-border bg-background sm:max-w-96">
         <Select.Value placeholder="Select your school" className="min-w-0 truncate" />
       </Select.Trigger>
       <Select.Portal>
@@ -102,7 +102,7 @@ export default function NavbarSchoolSwitcher({
                 <Select.Item
                   key={item.value ?? "all-schools"}
                   value={item.value}
-                  className="px-2.5 py-1 text-sm outline-none cursor-default data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
+                  className="px-3 py-3 text-base outline-none cursor-default md:px-2.5 md:py-1 md:text-sm data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
                 >
                   <Select.ItemText>{item.label}</Select.ItemText>
                 </Select.Item>

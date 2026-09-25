@@ -40,7 +40,7 @@ export default function DashboardSchoolSelector({
         router.push(`${pathname}?${params.toString()}`);
       }}
     >
-      <Select.Trigger className="flex items-center gap-1 px-2.5 py-1 text-sm rounded-lg border border-border bg-background">
+      <Select.Trigger className="flex items-center gap-1 min-h-11 px-3 py-2 text-base md:min-h-0 md:px-2.5 md:py-1 md:text-sm rounded-lg border border-border bg-background">
         <Select.Value placeholder="Select a school" />
       </Select.Trigger>
       <Select.Portal>
@@ -51,7 +51,7 @@ export default function DashboardSchoolSelector({
                 <Select.Item
                   key={item.value}
                   value={item.value}
-                  className="px-2.5 py-1 text-sm outline-none cursor-default data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
+                  className="px-3 py-3 text-base outline-none cursor-default md:px-2.5 md:py-1 md:text-sm data-[highlighted]:bg-muted data-[highlighted]:text-foreground"
                 >
                   <Select.ItemText>{item.label}</Select.ItemText>
                 </Select.Item>

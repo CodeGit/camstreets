@@ -256,13 +256,13 @@ export default function InstanceCard({
             <form action={cancelFormAction} className="space-y-4">
               <DialogTitle>Remove this signup?</DialogTitle>
               <DialogDescription>{summaryLines}</DialogDescription>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3 text-base md:space-y-2 md:text-sm">
                 <label className="flex items-center gap-2">
-                  <input type="radio" name="cancellation_type" value="one_off" defaultChecked />
+                  <input type="radio" name="cancellation_type" value="one_off" defaultChecked className="size-5 md:size-4" />
                   Just this date
                 </label>
                 <label className="flex items-center gap-2">
-                  <input type="radio" name="cancellation_type" value="regular" />
+                  <input type="radio" name="cancellation_type" value="regular" className="size-5 md:size-4" />
                   This and all future dates
                 </label>
               </div>
@@ -295,19 +295,19 @@ export default function InstanceCard({
           <form action={claimFormAction} className="space-y-4">
             <DialogTitle>Sign up</DialogTitle>
             <DialogDescription>{summaryLines}</DialogDescription>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-3 text-base md:space-y-2 md:text-sm">
               <label className="flex items-center gap-2">
-                <input type="radio" name="commitment_type" value="one_off" defaultChecked />
+                <input type="radio" name="commitment_type" value="one_off" defaultChecked className="size-5 md:size-4" />
                 One-off - just this date
               </label>
               <label className="flex items-start gap-2">
-                <input type="radio" name="commitment_type" value="regular" className="mt-1" />
+                <input type="radio" name="commitment_type" value="regular" className="size-5 md:size-4 md:mt-1" />
                 <span>
                   Regular - every{" "}
                   <select
                     name="frequency"
                     defaultValue="1"
-                    className="mx-0.5 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-sm"
+                    className="mx-0.5 rounded-md border border-input bg-transparent px-2 py-2 text-base md:px-1.5 md:py-0.5 md:text-sm"
                   >
                     <option value="1">week</option>
                     <option value="2">fortnight</option>
