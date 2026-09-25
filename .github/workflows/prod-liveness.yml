@@ -35,7 +35,25 @@ jobs:
   liveness:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      BASE_URL: https://www.camstreets.org
+      SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+      MONITOR_EMAIL: ${{ secrets.MONITOR_EMAIL }}
     steps:
+      # Names every missing or empty secret at once, using the GitHub secret's
+      # own name (the test's error only names the environment variable, and
+      # only the first one missing).
+      - name: Check secrets are set
+        run: |
+          missing=0
+          check() { if [ -z "$2" ]; then echo "::error::Repository secret $1 is missing or empty"; missing=1; fi; }
+          check PROD_SUPABASE_URL "$SUPABASE_URL"
+          check PROD_SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY"
+          check PROD_SUPABASE_SERVICE_ROLE_KEY "$SUPABASE_SERVICE_ROLE_KEY"
+          check MONITOR_EMAIL "$MONITOR_EMAIL"
+          exit $missing
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -45,12 +63,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Run liveness probes
-        env:
-          BASE_URL: https://www.camstreets.org
-          SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
-          MONITOR_EMAIL: ${{ secrets.MONITOR_EMAIL }}
         run: pnpm exec playwright test -c playwright.prod.config.ts liveness
       - uses: actions/upload-artifact@v4
         if: failure()
