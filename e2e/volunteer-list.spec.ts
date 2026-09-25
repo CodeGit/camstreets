@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { signInAs } from "./helpers/auth";
 
 // Seeded fixtures (supabase/seed.sql): Newnham Croft Primary (id 1) has
-// *three* admins out of the box - alex.admin@example.com (directly seeded,
+// *three* admins already - alex.admin@example.com (directly seeded,
 // original core fixture), Vera (auto-promoted to admin as the first
 // volunteer_schools joiner), and admin@example.com (directly seeded,
 // added later for role-based login testing). Only alex.admin and
@@ -14,10 +14,9 @@ const OTHER_ADMIN_IDS = [
   "a0000000-0000-0000-0000-000000000004", // admin@example.com
 ];
 
-// Bypasses RLS to arrange fixture state directly - there's no UI yet for
-// reducing a school down to a single admin (joining/leaving a school isn't
-// built), so this is the only way to get a school into that state for the
-// last-admin tests below. The key is the fixed local-stack default,
+// Bypasses RLS to arrange fixture state directly - there's no UI for
+// reducing a school down to a single admin, so this is the only way to get
+// a school into that state for the last-admin tests below. The key is the fixed local-stack default,
 // printed by `supabase start`; never valid against a hosted project.
 const serviceClient = createClient(
   "http://127.0.0.1:54321",

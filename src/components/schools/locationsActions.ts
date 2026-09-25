@@ -24,7 +24,7 @@ export async function createLocation(schoolId: number, formData: FormData) {
 
 // slots.location_id has no ON DELETE CASCADE, so deleting a location that
 // still has slots would otherwise fail with a foreign-key violation -
-// clean those up first rather than surface that as a confusing error. If
+// clean those up first rather than show a confusing error. If
 // any of those slots has a real signup, the whole delete is refused (see
 // deleteUnclaimedInstances) rather than silently orphaning a volunteer's
 // commitment.

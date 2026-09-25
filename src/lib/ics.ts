@@ -2,7 +2,7 @@
 // signups - used by src/app/calendar/[token]/feed.ics/route.ts. Hand-
 // rolled rather than a dependency: the shape needed here (a handful of
 // flat VEVENTs, no recurrence rules, no attendees) is small enough that a
-// library would add more surface area than it saves.
+// library would add more code than it saves.
 
 export type FeedSignup = {
   slot_instance: {

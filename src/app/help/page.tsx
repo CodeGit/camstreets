@@ -55,8 +55,9 @@ export default function HelpPage() {
           height={351}
         />
         <p className="text-sm text-muted-foreground">
-          The link is single-use and works only in the browser you requested it from, so if it doesn&apos;t work,
-          just go back and request a new one.
+          The link is single-use and works only in the browser you requested it from. If your email app opens links
+          in its own built-in browser, copy the link and paste it into your usual browser instead. If it still
+          doesn&apos;t work, go back and request a new one.
         </p>
       </section>
 

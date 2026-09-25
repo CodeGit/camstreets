@@ -1,7 +1,7 @@
 # camstreets
 Cambridge school streets volunteer availability calendar
 
-## Prerequisites setup (Supabase + Vercel + GitHub)
+## Setup: Supabase, Vercel and GitHub
 
 This project uses two environments - production (`main` branch) and dev/staging (`dev` branch) - each backed by its own Supabase project. Set these up before running the app locally or deploying.
 
@@ -28,13 +28,13 @@ Create two separate Supabase projects so prod and dev data never mix:
 
 1. Sign in at [vercel.com](https://vercel.com) and click **Add New → Project**.
 2. Import the GitHub repo from step 1.
-3. **Verify Project Settings → General → Framework Preset is set to `Next.js`, not `Other`.** This can end up as `Other` (e.g. if the framework wasn't auto-detected correctly during import), and it's a nasty silent failure: `next build` still runs fine and reports success either way, but with `Other` selected Vercel deploys the project as a plain static site - serving only whatever's literally in `public/` - and ignores the actual Next.js server build entirely. The symptom is every route 404ing (including ones that should always work, like the framework-served `favicon.ico`), even immediately after a fresh, successful-looking deployment. If you ever see that, this setting is the first thing to check.
+3. **Verify Project Settings → General → Framework Preset is set to `Next.js`, not `Other`.** This can end up as `Other` (for example if the framework wasn't detected correctly during import), and it fails silently: `next build` still runs and reports success either way, but with `Other` selected Vercel deploys the project as a plain static site - serving only what's in `public/` - and ignores the Next.js server build entirely. The symptom is every route returning 404 (even ones that should always work, like `favicon.ico`), straight after a deployment that looks successful. If you see that, check this setting first.
 4. In **Project Settings → Git**, confirm the **Production Branch** is set to `main`.
 5. Add domains under **Project Settings → Domains**:
    - Add `www.camstreets.org` - this serves the Production branch (`main`) by default.
    - Add `dev.camstreets.org`, then edit it and set its **Git Branch** to `dev` so it always serves the latest `dev` deployment instead of Production.
    - If the domain isn't already on Vercel's nameservers, add the DNS records Vercel provides at your domain registrar. Note that a domain can also work without full nameserver delegation (e.g. specific A/CNAME records at your existing registrar) - `vercel domains inspect <domain>` showing a nameserver mismatch doesn't necessarily mean the domain isn't reaching Vercel; test the actual URL to be sure.
-6. Decide on **Project Settings → Deployment Protection**. By default Vercel gates non-Production deployments (which includes the `dev` branch) behind a Vercel-account login (its "Vercel Authentication" / SSO feature). Turn it off if `dev.camstreets.org` should be reachable without a Vercel login; leave it on if it should stay private to the team.
+6. Decide on **Project Settings → Deployment Protection**. By default Vercel protects non-Production deployments (which includes the `dev` branch) with a Vercel-account login ("Vercel Authentication"). Turn it off if `dev.camstreets.org` should be reachable without a Vercel login; leave it on if it should stay private to the team.
 
 ### 4. Environment variables
 
@@ -144,7 +144,7 @@ iterate.
 ```bash
 pnpm supabase test new <name> --template pgtap
 ```
-scaffolds a pgTAP test file in `supabase/tests/`. Run all of them with:
+creates a pgTAP test file in `supabase/tests/`. Run all of them with:
 ```bash
 pnpm supabase test db --local
 ```
@@ -229,3 +229,53 @@ all deliver to the same real inbox but are distinct addresses as far as
 Supabase's `auth.users` is concerned, so you get isolated test accounts per
 role without juggling separate email accounts or mixing test data into your
 real one.
+
+### 8. Automated workflows (GitHub Actions)
+
+Four workflows live in `.github/workflows/`. Each has a header comment
+describing exactly what it does and which repository secrets it needs - that
+comment is the full list of secrets, so it isn't repeated here.
+Secrets are added under the repo's **Settings → Secrets and variables →
+Actions**; none of the workflows will do anything useful until the ones
+they list exist.
+
+| Workflow | When it runs | What it does |
+|---|---|---|
+| `ci.yml` | Every push to `dev` or `main` | Runs the Playwright e2e suite (`e2e/`) against a fresh local Supabase stack. |
+| `reset-demo.yml` | Nightly | Wipes and reseeds the three public demo schools on the **dev** project (`scripts/seed-demo.mjs --reset`), so `dev.camstreets.org`'s self-service demo resets itself. The script refuses to run against anything except the local stack or the dev project. |
+| `prod-liveness.yml` | Every 30 minutes | Email-free health probe of the live site (`e2e-prod/liveness.spec.ts`): public pages render, the school list loads from the database, and a signed-in session is accepted by the server. |
+| `prod-email-login.yml` | Four times a day | The full real magic-link sign-in (`e2e-prod/email-login.spec.ts`), including the email arriving in a monitor inbox, the emailed link, and the resulting session. It also checks the email's sender, subject and wording, which catches the hosted email template drifting from the repo. |
+
+Any of them can also be started by hand: **Actions** tab → pick the workflow →
+**Run workflow**. A failed scheduled run emails whoever last edited that
+workflow's schedule (GitHub's default); check your Actions notification
+settings if that isn't reaching you.
+
+**Setting up the production probes** (one-off):
+
+1. **A dedicated monitor user.** Pick an address only the probes will use.
+   The first successful run creates it as an ordinary volunteer (an
+   `auth.users` row plus its `volunteers` and calendar-feed rows). It never
+   joins a school, so it doesn't appear in any volunteer list.
+2. **A dedicated inbox for it** - use a throwaway account, not a personal one:
+   the credential the email probe uses can read the *whole* mailbox. For Gmail,
+   turn on 2-Step Verification for that account first, then create an app
+   password (a normal password won't work over IMAP).
+3. **A dedicated API key for the liveness probe** on the production Supabase
+   project (Project Settings → API Keys → a new secret key), rather than
+   reusing the one the site itself uses, so it can be revoked on its own.
+4. **Add the repository secrets** each workflow's header comment lists.
+   The email probe never receives the privileged key - only what a real user
+   would have (the site and an inbox).
+5. **Run each workflow once by hand** to confirm. Until the email probe's
+   secrets exist it skips itself with a warning annotation rather than failing.
+
+Run the same probes locally with `pnpm test:prod` (needs the same values as
+environment variables; see the two spec files and `e2e-prod/support.ts`).
+Probes are deliberately separate from `e2e/`: they must be safe to repeat
+against real data, and only ever act as the monitor user.
+
+**Setting up the demo reset** (one-off): add the secrets `reset-demo.yml`
+lists, then run it by hand once. The account it makes superuser must be the
+address you actually sign in with on `dev.camstreets.org`, otherwise it
+creates a second, separate account and yours isn't promoted.

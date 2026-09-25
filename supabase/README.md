@@ -1,98 +1,127 @@
 # Database schema
 
 This describes the data model and Row Level Security (RLS) rules defined in
-`supabase/migrations/`. See `20260707144814_create_core_schema.sql` for table
-definitions and `20260707162819_enable_rls.sql` for the policies referenced
-below.
+`supabase/migrations/`. Start with `20260707144814_create_core_schema.sql`
+(the first tables) and `20260707162819_enable_rls.sql` (the first policies);
+later migrations add to both. To see what's actually in the database right
+now, run `pnpm supabase db reset` locally and inspect it in Studio - the
+migrations are the definitive record, this file is a summary.
 
 ## Entities
 
 ```
-schools ─┬─< school_admins >─ volunteers
-         └─< locations ─< slots ─< slot_instances >─< signups >─ volunteers
-                                        ^
-                                        │
-                                     terms (per school)
+schools ─┬─< locations ─< slots ─< slot_instances >─< signups >─ volunteers
+         ├─< terms ─────────────────^  (each instance belongs to one term)
+         ├─< school_admins >─ volunteers
+         ├─< volunteer_schools >─ volunteers
+         └─< off_days   (inset days; bank holidays have no school)
+
+default_terms              (yearly template, copied into every school's terms)
+volunteer_calendar_feeds   (one per volunteer, for their calendar subscription)
 ```
 
 - **`schools`** - a participating school. `active` retires a school without
-  deleting historical data.
-- **`school_admins`** - join table granting a volunteer (`volunteers.id`)
-  admin rights over one specific school. Many-to-many: one person can admin
-  several schools, one school can have several admins.
+  deleting historical data. `is_demo` marks the public demo schools on the dev
+  site; the self-service "become an admin" button only ever picks from those.
 - **`locations`** - a physical point at a school needing volunteers (e.g. a
-  specific road closure or crossing point). A school can have several.
-- **`slots`** - a recurring weekly template at a location: day of week,
-  time, a label (e.g. "AM drop-off"), and a `capacity` (suggested number of
-  volunteers, not a hard cap).
+  crossing point or road closure). A school can have several.
+- **`slots`** - a recurring weekly template at a location: day of week
+  (1 = Monday to 5 = Friday in practice), start and end time, a label (e.g.
+  "Morning drop-off"), and a `capacity` (the number of volunteers wanted, not a
+  hard limit).
 - **`terms`** - a date range belonging to one school (e.g. "Autumn 1 2026").
-  Real dates from the moment it exists - `on_default_term_created`
-  (`20260909123828_propagate_default_terms_to_schools.sql`) backfills every
-  school automatically as soon as a superuser adds a year to `default_terms`,
-  so there's no separate "not ready yet" state to gate: a term's own
-  `start_date`/`end_date` already say whether it's past, current or
-  upcoming. Modelled as UK-style half-terms (Autumn 1/2, Spring 1/2, Summer
-  1/2) so half-term breaks are just the gaps between term rows, not an
-  exception inside one.
-- **`slot_instances`** - a `slot` expanded onto one concrete `date` within a
-  `term`. `start_time`, `end_time`, and `capacity` are **snapshotted** from
-  the parent `slot` at generation time, so editing a template later doesn't
-  rewrite already-generated dates. `status` (`open`/`cancelled`) is how a
-  single date gets cancelled (inset day, bad weather) without touching the
-  template or any other date.
-- **`volunteers`** - a 1:1 profile extending `auth.users`. Deliberately
-  minimal: just a self-chosen `display_name`, no phone/email, to keep
-  personal-data footprint low.
-- **`signups`** - a volunteer claiming a `slot_instance`. No exclusivity
-  constraint - any number of volunteers can sign up to the same instance;
-  the app compares the count against `slot_instances.capacity` to show
-  progress (it's a suggested number, not enforced).
+  Modelled as UK-style half-terms (Autumn 1/2, Spring 1/2, Summer 1/2), so a
+  half-term break is just the gap between two term rows. A term has no
+  "published" state: its own `start_date` and `end_date` already say whether it
+  is past, current or upcoming.
+- **`default_terms`** - a year's dates, entered once by a superuser. When one is
+  added, `on_default_term_created` copies it into every school's `terms`, and
+  `on_school_created` fills a new school's terms from the existing defaults.
+- **`off_days`** - dates with no slots: bank holidays (`school_id` is null, so
+  they apply to every school) and a school's own inset days.
+- **`slot_instances`** - a `slot` on one real `date` within a `term`.
+  `start_time`, `end_time` and `capacity` are **copied** from the slot when the
+  instance is generated, so editing a slot later doesn't rewrite dates that
+  already exist. `status` (`open` / `cancelled`) is how a single date is
+  cancelled (inset day, bad weather) without touching the slot or any other
+  date.
+- **`volunteers`** - a 1:1 profile extending `auth.users`, created
+  automatically by `on_auth_user_created`. Deliberately minimal: a
+  self-chosen `display_name` and a few flags (`is_admin`, `is_superuser`,
+  `preferred_school_id`) - no phone or email, to keep the amount of personal
+  data held low.
+- **`volunteer_schools`** - which schools a volunteer belongs to. Signing up
+  for a slot adds the volunteer to that slot's school automatically, and the
+  signup policy requires it. The first volunteer to join a school is made its
+  admin (`promote_first_school_volunteer_to_admin`).
+- **`school_admins`** - which volunteers administer which school. Many-to-many:
+  one person can admin several schools and one school can have several admins.
+  `volunteers.is_admin` is a copy of "has any row here", kept up to date by the
+  `on_school_admins_changed` trigger so the app can check it cheaply.
+- **`signups`** - a volunteer claiming a `slot_instance`, with a `status` of
+  `confirmed` or `cancelled`. Cancelling only changes the status - signups are
+  never deleted, so history stays accurate. No limit on how many volunteers can
+  sign up to one instance; the app compares the count with
+  `slot_instances.capacity` to show how covered it is.
+- **`volunteer_calendar_feeds`** - a volunteer's private, regenerable `token`
+  used in their calendar subscription link. Created automatically for every new
+  volunteer (`on_volunteer_created`).
 
-Generating `slot_instances` for a term (expanding weekly slots into dated
-rows, excluding `off_days`) is deliberately **not** a database function - it
-happens in application code (Next.js Server Action), since it's triggered by
-one specific admin action rather than needing to run atomically inside the
-database. Not yet built - see `TODO.md` §4.
+### How slot instances get created
+
+Generating `slot_instances` happens **inside the database**, in
+`generate_slot_instances_for_school_term`. It runs when a term is added
+(`generate_instances_after_term_insert`) and when a slot is added
+(`generate_instances_after_slot_insert`). For each active slot it creates one
+instance per matching weekday in the term, skipping any date in `off_days`
+(bank holidays and that school's inset days). Existing instances are left
+alone (`on conflict do nothing`).
 
 ## Roles
 
-Three tiers, checked via two helper functions (`is_superuser()`,
-`is_school_admin(school_id)`):
+Three levels, checked through two helper functions, `is_superuser()` and
+`is_school_admin(school_id)`:
 
-- **Superuser** - global, set via `app_metadata.is_superuser` on the user's
-  JWT (never `user_metadata`, which users can edit themselves). Can create
-  schools and override any school admin check. Granted manually via the
-  Supabase dashboard - there's no self-service way to become one.
-- **School admin** - scoped to specific school(s) via `school_admins`.
-  Manages that school's locations, slots, terms, and can cancel signups for
-  their own school's slots.
-- **Volunteer / public** - anyone logged in (or not) can read public data;
-  a logged-in volunteer manages their own profile and signups.
+- **Superuser** - has `is_superuser = true` on their row in `public.volunteers`.
+  The function reads that row live on every request, so a change takes effect
+  without signing out and in. Can create schools and pass any school-admin
+  check. It can only be set with the project's `service_role` key (SQL Editor),
+  never through the app - see `README.md` §7.
+- **School admin** - has a row in `school_admins` for a specific school. Manages
+  that school's locations, slots, terms and volunteers, and can cancel signups
+  for its slots.
+- **Volunteer / public** - anyone, signed in or not, can read the public data;
+  a signed-in volunteer manages their own profile, school list and signups.
 
 ## RLS summary
 
+A superuser can do everything a school admin can, on every school, so it isn't
+repeated in the table.
+
 | Table | Read | Write |
 |---|---|---|
-| `schools` | everyone | admin/superuser updates; only superuser creates (bootstrapping - you can't be admin of a school that doesn't exist yet) |
-| `locations` | everyone | school admin or superuser, full CRUD |
-| `slots` | everyone | school admin or superuser, full CRUD |
-| `school_admins` | that school's admins + superuser | school admin manages their own school's admin list (including removing themselves - no "last admin" guard at the DB level; that's a Next.js-level check) |
-| `terms` | everyone | school admin or superuser, full CRUD |
-| `slot_instances` | everyone | school admin or superuser (resolved via `slot → location → school`) |
-| `volunteers` | everyone (just `display_name`, intentionally public - see below) | self only |
-| `signups` | everyone | volunteer signs up/cancels their own; school admin can also cancel signups for their own school's slots |
+| `schools` | everyone | school admin updates their own; only a superuser creates (you can't be admin of a school that doesn't exist yet) |
+| `locations`, `slots`, `terms`, `slot_instances` | everyone | school admin, full control (`slots` and `slot_instances` find their school through `location`) |
+| `default_terms` | signed-in users | superuser only |
+| `off_days` | signed-in users | school admin (their inset days) or superuser (bank holidays) |
+| `school_admins` | that school's admins | school admin manages their own school's list, including removing themselves (there is no "last admin" guard in the database; the app checks that) |
+| `volunteer_schools` | the volunteer, and that school's admins | a volunteer adds or removes themselves; a school admin can remove a volunteer from their school |
+| `volunteers` | everyone (only `display_name` is meant to be public - see below) | the volunteer, for their own row |
+| `signups` | everyone | a volunteer signs themselves up (only at a school they belong to) and cancels their own; a school admin can cancel signups for their school's slots |
+| `volunteer_calendar_feeds` | the volunteer | the volunteer, for their own row |
 
-Notes on some of the less obvious calls:
+Notes on some of the less obvious choices:
 
-- **`volunteers.display_name` is publicly readable.** This only works because
-  the table was deliberately minimised to just a self-chosen display name -
-  no phone, no email duplicated from `auth.users`. If more fields are added
-  later, revisit whether they should stay admin/self-only.
-- **Multiple RLS policies on the same command are OR'd together**, not a
-  fallback chain. `terms`/`slot_instances` reads are unconditionally public
-  (`using (true)`), but writes still OR a separate "school admin or
-  superuser" policy on top - read and write are governed by different
-  policies on the same table, not one combined rule.
-- **`slots`/`slot_instances` admin checks require a subquery** to resolve
-  the owning school, since neither table stores `school_id` directly (they
-  only have `location_id` / `slot_id`).
+- **`volunteers` is publicly readable.** That is only safe because the table
+  holds no phone number or email - just a display name and a few flags. If more
+  personal fields are added later, decide whether they should be readable by
+  the volunteer and admins only.
+- **Users can't grant themselves roles.** Column-level permissions stop a
+  signed-in user writing `is_admin` or `is_superuser` on their own row.
+- **When a table has several policies for the same action, they are combined
+  with OR** - it isn't a fallback chain. For example, reads of `terms` and
+  `slot_instances` are open to everyone (`using (true)`), while writes are
+  governed by a separate "school admin or superuser" policy on the same table.
+- **`slots` and `slot_instances` admin checks need a subquery** to find the
+  owning school, because neither table stores `school_id` directly (they only
+  have `location_id` / `slot_id`).

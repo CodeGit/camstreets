@@ -5,6 +5,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOrigin } from "@/lib/origin";
+import { classifySendError, loginErrorUrl } from "@/lib/authErrors";
 
 export async function signInWithMagicLink(formData: FormData) {
   const email = formData.get("email");
@@ -23,7 +24,13 @@ export async function signInWithMagicLink(formData: FormData) {
   });
 
   if (error) {
-    redirect("/login?error=send-failed");
+    // Logged in full (without the email address) so the cause is in the
+    // server logs even when the page only shows a friendly message.
+    console.error(
+      "[login] could not send sign-in email: " +
+        JSON.stringify({ code: error.code ?? null, name: error.name, status: error.status ?? null, message: error.message })
+    );
+    redirect(loginErrorUrl(classifySendError(error)));
   }
 
   redirect("/login?sent=true");

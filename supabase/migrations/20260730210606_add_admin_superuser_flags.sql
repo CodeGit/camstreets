@@ -1,7 +1,9 @@
--- Stored, denormalized copies of admin/superuser status on volunteers, for
--- cheap display purposes (e.g. the navbar showing role). The dynamic checks
--- (is_superuser(), is_school_admin()) remain the source of truth for RLS -
--- this migration doesn't touch authorization, only adds a synced copy.
+-- Stored copies of admin/superuser status on volunteers, for cheap display
+-- (e.g. the navbar showing role). At the time of this migration the checks
+-- (is_superuser(), is_school_admin()) stayed the definitive rule for RLS and
+-- these columns were only a synced copy. That changed for superusers in
+-- 20260731170107_superuser_from_volunteers_table.sql: is_superuser() now
+-- reads volunteers.is_superuser itself.
 alter table public.volunteers
   add column is_admin boolean not null default false,
   add column is_superuser boolean not null default false;

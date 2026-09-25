@@ -124,11 +124,11 @@ test("a school's terms are auto-populated from default_terms and editable in pla
   ).toBeVisible();
 });
 
-// A brand-new school has no admin yet (creating one doesn't auto-grant
-// admin rights - see TODO.md §4), and the superuser dashboard has no
-// per-school "Term times" tab (that's admin-dashboard-only), so there's no
-// UI path to check this for an unclaimed school. Verifying directly
-// against the database instead, same pattern as volunteer-list.spec.ts.
+// A brand-new school has no admin yet (creating one doesn't make its creator
+// an admin - the first volunteer to join it is promoted, see TODO.md §4), so
+// there's no admin to sign in as. Checking the database directly is simpler
+// than driving the superuser's UI for an unclaimed school - same pattern as
+// volunteer-list.spec.ts.
 test("a new school is automatically backfilled with terms from existing default years", async ({
   page,
 }) => {

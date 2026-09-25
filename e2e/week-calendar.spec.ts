@@ -129,7 +129,7 @@ test("choosing a fortnightly interval confirms every other week, skipping the we
   await page.goto("/schools/1?date=2026-09-14");
   await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ volunteers/);
 
-  // +2 weeks: confirmed again, back on the fortnightly cadence.
+  // +2 weeks: confirmed again, back on the fortnightly pattern.
   await page.goto("/schools/1?date=2026-09-21");
   await expect(grantchesterAfternoon(page)).toHaveAccessibleName(/Needs\ more\ volunteers/);
 

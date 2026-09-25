@@ -9,8 +9,8 @@
 -- truth, and rely on the existing (slot_id, term_id, date) unique
 -- constraint + `on conflict do nothing` so re-running is always safe.
 --
--- start_time/end_time/capacity are snapshotted from the slot at generation
--- time, per the existing design note in supabase/README.md - editing a slot
+-- start_time/end_time/capacity are copied from the slot when the instance is
+-- generated, per the existing design note in supabase/README.md - editing a slot
 -- template later doesn't rewrite already-generated dates.
 --
 -- Known limitation (left as a follow-up, not built here): adding an

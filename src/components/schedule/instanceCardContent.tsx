@@ -3,7 +3,7 @@ import { volunteerBadgeClass } from "@/lib/volunteerColor";
 
 // The four ways a single slot instance's status/coverage gets rendered,
 // extracted out of instanceCard.tsx so that file's own job shrinks to
-// "compute the derived state and orchestrate the Dialog/actions" rather
+// "work out the derived state and run the dialog and actions" rather
 // than also owning every variant's markup. Each takes only the props it
 // actually needs (GlanceVariant barely needs anything) rather than sharing
 // one wide props shape - deliberately, so a given variant's own contract

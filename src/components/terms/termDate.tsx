@@ -27,8 +27,8 @@ export type OffDayEntry = {
 
 // Shared display for one academic year's worth of terms, reused by both
 // the superuser's default_terms editor and a school's own term times -
-// single source of truth for this layout rather than two components that
-// slowly diverge. `offDays` is optional: pass it (inset days + bank
+// the one place this layout is defined, rather than two components that
+// slowly drift apart. `offDays` is optional: pass it (inset days + bank
 // holidays for this year) to show the collapsible list, or omit it to
 // leave that out entirely (the default_terms editor isn't school-scoped,
 // so inset days don't apply there, and bank holidays get their own

@@ -11,22 +11,39 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeReference } from "@/lib/authErrors";
 import { signInWithMagicLink } from "./actions";
 
+// One specific message per cause (see lib/authErrors.ts for how a Supabase
+// error maps to a key). Keys not listed here fall back to a generic message.
 const ERROR_MESSAGES: Record<string, string> = {
   "missing-email": "Enter your email address.",
-  "send-failed": "Something went wrong sending the link. Try again.",
+  "invalid-email": "That doesn't look like a valid email address. Check it for typos and try again.",
+  "rate-limited":
+    "Too many sign-in emails have been requested. Wait a few minutes and try again. If you already asked for one, check your inbox and spam folder - it stays valid for 24 hours.",
+  "service-unreachable": "We couldn't reach the sign-in service. Check your connection and try again.",
+  "email-send-failed":
+    "We couldn't send the sign-in email. The problem is on our side, not yours - try again in a few minutes.",
+  "send-failed": "We couldn't send the sign-in link. Try again in a minute.",
+  "link-expired":
+    "That sign-in link has expired or has already been used. Each link works once and lasts 24 hours - request a new one below.",
+  "wrong-browser":
+    "That sign-in link was opened in a different browser or device from the one you asked for it on. Request a new link and open it in the same browser. If your email app opens links in its own built-in browser, copy the link and paste it into your usual browser instead.",
   "callback-failed":
-    "That sign-in link didn't work - it may have expired, already been used, or been opened in a different browser than the one you requested it from. Try signing in again.",
+    "That sign-in link didn't work - it may have been cut short when copied, or something went wrong on our side. Request a new link below.",
   "session-expired": "Your session expired - sign in again to continue.",
 };
+
+// Errors that are the user's own to fix don't need a "contact us" line.
+const SELF_EXPLANATORY = new Set(["missing-email", "invalid-email", "session-expired"]);
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string; error?: string }>;
+  searchParams: Promise<{ sent?: string; error?: string; ref?: string }>;
 }) {
-  const { sent, error } = await searchParams;
+  const { sent, error, ref } = await searchParams;
+  const reference = safeReference(ref);
 
   return (
     <div className="flex flex-1 items-center justify-center p-4">
@@ -47,8 +64,23 @@ export default async function LoginPage({
           )}
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>
-                {ERROR_MESSAGES[error] ?? "Something went wrong. Try again."}
+              <AlertDescription className="space-y-2">
+                <p>{ERROR_MESSAGES[error] ?? "Something went wrong signing you in. Try again."}</p>
+                {!SELF_EXPLANATORY.has(error) && (
+                  <p className="text-xs">
+                    Still stuck? Email{" "}
+                    <a href="mailto:help@camstreets.org" className="underline underline-offset-2">
+                      help@camstreets.org
+                    </a>
+                    {reference && (
+                      <>
+                        {" "}
+                        and quote <span className="font-mono">{reference}</span>
+                      </>
+                    )}
+                    .
+                  </p>
+                )}
               </AlertDescription>
             </Alert>
           )}

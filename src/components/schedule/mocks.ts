@@ -3,8 +3,8 @@ import type { ScheduleInstance } from "./instanceCard";
 
 type Volunteer = Tables<"volunteers">;
 
-// Shared by day.stories.tsx and week.stories.tsx - a single source of truth
-// for building fake ScheduleInstance data so both stay in sync as the real
+// Shared by day.stories.tsx and week.stories.tsx - one shared way of
+// building fake ScheduleInstance data so both stay in sync as the real
 // shape (slot_instances joined to slots/locations/signups/volunteers)
 // evolves.
 export function mockVolunteer(

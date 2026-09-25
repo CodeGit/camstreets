@@ -113,8 +113,7 @@ export async function removeVolunteerFromSchool(schoolId: number, volunteerId: s
 }
 
 // terms is still stored as two half-term rows per season (school_id, name,
-// start_date, end_date - see supabase/README.md), deliberately kept
-// simple for the not-yet-built "publish a term" generation logic. Schools
+// start_date, end_date - see supabase/README.md). Schools
 // no longer create these manually - on_default_term_created (see
 // 20260909123828_propagate_default_terms_to_schools.sql) populates them
 // automatically from default_terms - but a school can still edit the

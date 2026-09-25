@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 
-// Shared prev/next chevron pair for every calendar granularity (day, week,
+// Shared prev/next chevron pair for every calendar view (day, week,
 // month, term) - previously duplicated near-identically in each. A null
 // href (e.g. no earlier/later term exists yet) renders a disabled-looking
 // placeholder instead of a dead link.
