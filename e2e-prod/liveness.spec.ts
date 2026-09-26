@@ -47,3 +47,16 @@ test("a signed-in session is accepted by the server", async ({ page, context, ba
     await session.signOut();
   }
 });
+
+test("the bare domain redirects to www, so sign-in links always use an allowed address", async ({ request, baseURL }) => {
+  // Emailed sign-in links point at whatever address the visitor used. Supabase
+  // only honours addresses on its redirect allow-list (www only), and
+  // otherwise silently sends the visitor to the home page, still signed out.
+  const host = new URL(baseURL!).hostname;
+  test.skip(!host.startsWith("www."), "only meaningful when testing a www site");
+
+  const bare = `https://${host.replace(/^www\./, "")}/`;
+  const response = await request.get(bare, { maxRedirects: 0 });
+  expect([301, 302, 307, 308]).toContain(response.status());
+  expect(response.headers()["location"]).toContain(host);
+});

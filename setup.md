@@ -11,7 +11,7 @@ set up, checked against the Vercel and Supabase projects on 2026-09-25.
 |---|---|---|---|---|
 | **Local** | any | - (`pnpm dev`) | local Docker stack (`pnpm run db:start`) | http://localhost:3000 |
 | **Dev/staging** | `dev` | Preview deployments | "Cam School Street Planner Dev" (`snquofgpzpjguluglbif`, eu-west-2) | `dev.camstreets.org` |
-| **Production** | `main` | Production deployment | "Cam School Street Planner" (`acchajbsrxirldadwgnn`, eu-west-2) | `www.camstreets.org` and `camstreets.org` |
+| **Production** | `main` | Production deployment | "Cam School Street Planner" (`acchajbsrxirldadwgnn`, eu-west-2) | `www.camstreets.org` (`camstreets.org` redirects to it) |
 
 Both hosted Supabase projects are active. The Vercel project is **camstreets**,
 under the `code-git-vercel` team. DNS for `camstreets.org` is managed at the
@@ -144,8 +144,14 @@ they're set up.
 
 ## Production (Vercel Production + Supabase prod)
 
-- `main` is the Production branch, served at `www.camstreets.org` and
-  `camstreets.org`. `camstreets.vercel.app` also works as a fallback.
+- `main` is the Production branch, served at `www.camstreets.org`.
+  `camstreets.org` (no `www`) is set in Vercel (Project Settings → Domains) to
+  **redirect permanently to `www`**, and that must stay: emailed sign-in links
+  point at whatever address the visitor used, and Supabase only honours
+  addresses on its redirect allow-list, which lists `www` only. Without the
+  redirect, someone who typed the bare domain got a link that silently landed
+  them on the home page, still signed out. `prod-liveness.yml` checks the
+  redirect. `camstreets.vercel.app` also works as a fallback.
 - Every migration in `supabase/migrations/` has been applied to the prod
   project. New ones are pushed by hand (`README.md` §6) - **check which project
   you're linked to first**.
@@ -186,6 +192,11 @@ address.
 | couldn't reach the sign-in service | Network problem or outage | `AuthRetryableFetchError` |
 | expired or already used | Link older than 24 hours, or clicked twice | `otp_expired`, `flow_state_expired`, `flow_state_not_found` |
 | different browser or device | Link opened somewhere other than where it was requested (often an email app's built-in browser) | `pkce_code_verifier_not_found` |
+
+A link that lands on the ordinary home page with **no message at all** means
+Supabase ignored the link's destination because it wasn't on the redirect
+allow-list (see the bare-domain redirect under Production). It leaves no error
+code, so check the allow-list and domain settings first.
 | didn't work (generic) | Any other failure opening the link | varies |
 
 ## Known gaps
