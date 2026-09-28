@@ -12,18 +12,20 @@ const haveMailbox = process.env.MAIL_SOURCE === "mailpit" || (process.env.IMAP_H
 
 test.skip(!email || !haveMailbox, "MONITOR_EMAIL / IMAP_* not configured - email-login probe skipped");
 
-// No retry for this one test: a failed send is most often Supabase's 60-
-// second per-address cooldown (it only allows one OTP request to the same
-// address per minute) or its hourly send cap - both shared across every run
-// that hits this address, including the scheduled ones. Playwright's default
-// retry (playwright.prod.config.ts) would resend within seconds, landing
-// inside that same cooldown and failing identically - turning one rate
-// limit into two, and making a manual re-run right after a failure the
-// worst way to check it. Let this fail once and be visible, rather than
-// silently eating into the same limit.
+// No retry for this one test. A failed attempt has usually still sent the
+// email (the send can be slow - see below), and Supabase only allows one
+// sign-in email to the same address per 60 seconds - so a retry seconds
+// later is rejected, and one slow send shows up as two failures. Let it fail
+// once, clearly, and let the next scheduled run be the retry.
 test.describe.configure({ retries: 0 });
 
 test("magic-link sign-in works end to end, including email delivery", async ({ page }) => {
+  // Room for the slowest allowed path: up to 60s waiting for the send, then
+  // up to 120s waiting for the email (mailbox.ts), plus the page steps.
+  // Without this the shared 90s limit would cut a slow run off with a bare
+  // "Test timeout" instead of the specific failure.
+  test.setTimeout(240_000);
+
   const requestedAt = new Date();
 
   await page.goto("/login");
@@ -36,7 +38,7 @@ test("magic-link sign-in works end to end, including email delivery", async ({ p
   // empty route-announcer element (for screen-reader page-change
   // announcements), which is a false positive here every single time.
   const failed = page.locator('[data-slot="alert"]').filter({ hasNotText: "Check your email" });
-  await expect(sent.or(failed)).toBeVisible();
+  await expect(sent.or(failed)).toBeVisible({ timeout: 60_000 });
   if (await failed.isVisible()) {
     // Names the actual cause (e.g. "Too many sign-in emails have been
     // requested...") instead of a bare "element not found" - see
