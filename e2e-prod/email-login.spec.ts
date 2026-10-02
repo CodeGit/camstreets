@@ -21,10 +21,11 @@ test.describe.configure({ retries: 0 });
 
 test("magic-link sign-in works end to end, including email delivery", async ({ page }) => {
   // Room for the slowest allowed path: up to 60s waiting for the send, then
-  // up to 120s waiting for the email (mailbox.ts), plus the page steps.
-  // Without this the shared 90s limit would cut a slow run off with a bare
-  // "Test timeout" instead of the specific failure.
-  test.setTimeout(240_000);
+  // up to 300s waiting for the email (mailbox.ts - see the comment there on
+  // why it's 300s, not 120s), plus the page steps. Without this the shared
+  // 90s limit would cut a slow run off with a bare "Test timeout" instead of
+  // the specific failure.
+  test.setTimeout(420_000);
 
   const requestedAt = new Date();
 
