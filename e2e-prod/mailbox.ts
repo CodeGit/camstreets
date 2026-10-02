@@ -35,10 +35,12 @@ export async function waitForSignInEmail(to: string, sentAfter: Date): Promise<S
     // 5 minutes, not 120s: confirmed 2026-10-02 that sign-in emails do
     // arrive in the Inbox (not Spam), just sometimes well after 120s -
     // dozens of unread, never-collected emails had piled up from runs that
-    // gave up too early and disconnected before delivery caught up. If this
-    // window is still being used up regularly, that's itself worth raising
-    // with SMTP2GO - a real volunteer waiting 5 minutes for a sign-in link
-    // would reasonably think the site is broken.
+    // gave up too early and disconnected before delivery caught up. A real
+    // sign-in the same day arrived in under 20s, so this looks specific to
+    // the monitor address's own repetitive, clockwork-regular traffic
+    // (plausibly a receiving-side greylist/defer response to that pattern),
+    // not a general delivery problem - 5 minutes is a safety margin for the
+    // probe, not evidence real volunteers are waiting anywhere near that long.
     const deadline = Date.now() + 300_000;
     while (Date.now() < deadline) {
       for (const mailbox of mailboxes) {
